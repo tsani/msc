@@ -1,0 +1,3 @@
+rec fundamental : (g : ctx) {M : [g ⊢ tm A[]]} RedSub [g] [⊢ $S] → Reduce [⊢ A] [⊢ M[$S]] =
+mlam M ⇒ fn rs ⇒ ?
+    ;

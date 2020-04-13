@@ -1,0 +1,32 @@
+\begin{center}
+  \bfseries\textsc{Abstract}
+\end{center}
+
+Beluga is a proof environment based on the logical framework LF that provides
+infrastructural support for representing formal systems and proofs about them.
+As a consequence, meta-theoretic proofs are precise and compact. However,
+programmers write proofs as total recursive programs. This can be challenging
+and cumbersome.
+
+We present the design and implementation of Harpoon, an interactive proof
+environment built on top of Beluga. Harpoon users develop proofs using a small,
+fixed set of tactics. Behind the scenes, the execution of tactics elaborates a
+proof script that reflects the subgoal structure of the proof. We model
+incomplete proofs using contextual variables to represent holes.
+We give a sound translation of proof scripts into Beluga programs which allows
+us to execute them. Proof scripts and programs seamlessly interact and can be
+used interchangeably.
+
+We have used Harpoon for examples ranging from simple type safety
+proofs for MiniML to normalization proofs including
+the recently proposed POPLMark reloaded challenge.
+
+\vfill
+
+
+%We have used Harpoon in examples ranging from type safety for MiniML to normalization proofs for the simply-typed lambda calculus.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main.tex"
+%%% End:

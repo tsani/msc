@@ -1,0 +1,527 @@
+\usepackage[dvipsnames]{xcolor}
+\usepackage[lighttt]{lmodern}
+
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\renewcommand\UrlFont{\color{blue}\rmfamily}
+\usepackage{proof}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{float}
+\usepackage{hhline}
+\usepackage{underscore}
+
+\renewcommand{\baselinestretch}{1.5}
+
+%%% TiKZ begin
+
+\usepackage{tikz} % For trees.
+\usetikzlibrary{positioning,shapes.multipart}
+\usetikzlibrary{arrows,positioning}
+\tikzset{
+    %Define standard arrow tip
+    >=stealth',
+    %Define style for boxes
+  block/.style ={draw=black, thin, text width=3cm,align=center, rounded corners, minimum height=2em, draw, shape=rectangle split, rectangle split parts=2,
+ inner sep=1ex},
+    % Define arrow style
+    pil/.style={
+           ->,
+           thin,
+           shorten <=3pt,
+           shorten >=3pt,}
+       }
+
+%%% TiKZ end
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LISTINGS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\definecolor{burntumber}{rgb}{0.54, 0.2, 0.14}
+
+\usepackage{listings}
+
+\newcommand{\nicettfamily}{%
+  \fontseries{l}\selectfont
+  \footnotesize\ttfamily%
+}%
+
+\lstdefinelanguage{Beluga}{%
+  morekeywords = [1]{% real keywords
+    LF, type, ctype, schema, rec, proof, as, case, by, of, unbox, inductive,
+    stratified, %
+    % Harpoon commands:
+    solve, msplit, suffices, split, by, as, ih, lemma, invert,
+    impossible, undo
+  },%
+  keywordstyle = [1]{%
+%    \nicettfamily\bfseries\color{burntumber}%
+     \fontseries{b}\selectfont
+  },%
+  morekeywords = [2]{% constructors are red ...
+    unit, arr, c, lam, app, v_lam, v_c, s_app_1, s_app, s_beta, next, refl, halts/m, %
+    Unit, Arr %
+  },%
+  keywordstyle = [2]{\nicettfamily\color{purple!90}},%
+  morekeywords = [3]{% types are blue ...
+    tp, tm, value, step, steps, halts, Reduce, RedSub, ctx %
+  },%
+  keywordstyle = [3]{%
+    \nicettfamily\color{BlueViolet}
+  },%
+  alsoletter=/,%
+  columns=flexible,%
+  sensitive = true,%
+  basicstyle=\nicettfamily,%
+  mathescape=true,%
+  literate={%
+    {→}{$\rightarrow$ }1%
+    {->}{$\rightarrow$ }1%
+    {\\}{$\lambda$}1%
+    {⊢}{$\proves\;$}1%
+    {|-}{$\proves\;$}1%
+    {sigma}{$\sigma$}1%
+  }%
+}%
+
+\lstset{
+  language={Beluga},
+  basicstyle=\renewcommand{\baselinestretch}{1}\nicettfamily
+}
+
+\newcommand{\tightlistings}{%
+  \lstset{%
+    belowskip=-0.5\baselineskip,
+    aboveskip=0pt
+  }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TODO ITEMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{todonotes}
+% \setuptodonotes{color=green!40}
+\newcommand{\inlinetodo}[1]{\todo[inline]{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SYSTEM NAMES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \mksystemname{foo} creates a command \foo that outputs the text "foo" in
+% smallcaps.
+\newcommand{\mksystemname}[1]{%
+  \expandafter\newcommand\csname #1\endcsname{%
+    \textsc{#1}%
+  }%
+}
+\mksystemname{Abella}
+\mksystemname{Beluga}
+\mksystemname{Harpoon}
+\mksystemname{Coq}
+\mksystemname{Agda}
+\mksystemname{Isabelle}
+\mksystemname{Emacs}
+\mksystemname{Twelf}
+\mksystemname{LCF}
+% the slash means we can't use mksystemname
+\newcommand{\IsabelleHOL}{\textsc{Isabelle/HOL}}
+\mksystemname{Mizar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MATH / PROOF COMMANDS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% For long squiggle arrow
+\newlength{\LETTERheight}
+\AtBeginDocument{\settoheight{\LETTERheight}{I}}
+\newcommand*{\longleadsto}[1]{\ \raisebox{0.24\LETTERheight}{\tikz \draw [->,
+line join=round,
+>=stealth',
+decorate, decoration={
+  % zigzag, % uncomment for squiggle
+  segment length=4,
+  amplitude=.9,
+  post=lineto,
+  post length=2pt
+}] (0,0) -- (#1,0);}\ }
+
+% "interactive transition"
+\newcommand{\basicitrans}{\ensuremath\longleadsto{0.85}}
+\DeclareMathOperator{\itrans}{\mathbin{\basicitrans}}
+\newcommand{\itranss}[1]{\mathbin{\overset{#1}{\basicitrans}\hspace{-1ex}^*}\,}
+\newcommand{\proves}{\vdash}
+\newcommand{\sem}{\vDash}
+
+\newcommand{\chk}{\Longleftarrow}
+\newcommand{\syn}{\Longrightarrow}
+\newcommand{\oute}{\rightsquigarrow}
+
+\newcommand{\interp}[1]{\llbracket #1 \rrbracket}
+\newcommand{\Union}{\bigcup}
+
+% To make \vec extend over its argument
+\renewcommand{\vec}{\overrightarrow}
+
+% \mkscommand{foo} defines two commands.
+% 1. \sfoo which prints foo in serif font (even in math mode!)
+% 2. \sfoos which prints foo in serif font followed by a space.
+\newcommand{\mkscommand}[1]{%
+  \expandafter\newcommand\csname s#1\endcsname{%
+    \text{\sf #1}%
+  }%
+  \expandafter\newcommand\csname s#1s\endcsname{%
+    \text{\sf #1}\;%
+  }%
+}
+
+% Unroll function for decomposition function types.
+\mkscommand{unroll}
+\mkscommand{roll}
+% Coverage function using in splitting
+\mkscommand{cov}
+
+\newtheorem{thm}{Theorem}
+% \newtheorem*{prop}{Property}
+\def\property{\par\medskip\noindent{\bf Properties:} \ignorespaces}
+\def\endproperty{}
+
+% We frequently need to refer to a subgoal's type, which is this contextual
+% type.
+% This command is parametric so you can do e.g. \goal{^\prime} and \goal{_i}
+\newcommand{\goalctx}[1]{\Delta#1; \Gamma#1} % just the goal context
+\newcommand{\goalwith}[2]{(#1 \vdash #2)} % basic goal type formatting
+% \newcommand{\goalclosed}{\square\tau} % closed context
+\newcommand{\goalclosed}{(\cdot ; \cdot \vdash \tau)}
+\newcommand{\goal}[1]{\goalwith{\goalctx{#1}}{\tau#1}}
+
+% Basic substitution with square brackets.
+\newcommand{\subst}[2]{[#1]#2}
+
+% \psubst{P'/g}{P} formats a subgoal substitution of P' for g in P.
+\newcommand{\psubst}{\subst}  %[2]{[#1]#2}
+
+% \msubst{theta}{i} formats a modal substitution theta applied to i.
+% \newcommand{\msubst}[2]{\llbracket#1\rrbracket #2}
+\newcommand{\msubst}[2]{[#1]#2}
+
+
+% Letter we use to represent an interactive command / action.
+\newcommand{\action}{\alpha}
+% Sequence of actionseqs
+\newcommand{\actionseq}{\bar\action}
+
+
+
+% Translation arrow
+\newcommand{\transto}{-\!\!\!-\!\!\!\!\rightharpoonup}
+% To make a longer arrow, I put a minus before the harpoon and nudge the harpoon
+% to the left so they overlap. Thanks to Marcel for this trick.
+
+\newcommand{\unif}{\overset{?}{=}}
+
+% grammar alternative
+\newcommand{\galt}{\mid}
+
+% Format a BNF grammar.
+% Example:
+% \begin{grammar}
+%   \category{Terms}{t}{%
+%     t_1\; t_2 \galt
+%     \lambda x.\, t \galt
+%     ...
+%   }
+% \end{grammar}
+%
+% Each grammar environment can have multiple \category declarations in it.
+% The grammar environment does not intelligently split lines for you, so if you
+% need to continue a declaration on the following line, use the command
+% \continue{%
+%   case t of \vec{B} \galt
+%   (t_1, t_2) \galt
+%   ...
+% }
+%
+\newenvironment{grammar}{%
+  \newcommand{\category}[3]{%
+    \mbox{##1} & ##2 & ::= & ##3 \\
+  }
+  \newcommand{\continue}[1]{%
+    & & \mid & ##1 \\
+  }
+  \begin{array}{l@{~}c@{~}r@{~}l}
+    }{%
+  \end{array}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% INFERENCE RULE NAMES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \mkrulename{\cmd}{name} defines the command \cmd to print the text `name`
+% formatted as a name of an inference rule.
+\newcommand{\mkrulename}[2]{%
+  \expandafter\newcommand{#1}{%
+    \text{\sc #2}%
+  }%
+}
+
+\mkrulename{\irefl}{I-Refl}
+\mkrulename{\isingle}{I-Single}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LANGUAGE SYNTAX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% The 'tt' family of commands are for the INTERACTIVE commands.
+% The 'kw' family of commands are for PROOF SCRIPT keywords.
+% The 't' family of commands are for BELUGA terms.
+
+% The following commands define helper macros for generating macros to print
+% keywords in an appropriate font.
+% They all have the same syntax:
+% \mkfoocommand{bar} generates two commands:
+% \foobar to print ``bar''
+% \foobars to print ``bar'' followed by a space (useful in math mode)
+% The generated commands will work in math mode and in text mode.
+
+\newcommand{\helpmkcommand}[3]{%
+  \text{#3%
+    \if#1\relax%
+    #2%
+    \else%
+    #1%
+    \fi%
+  }%
+}
+
+% \mkmkcommand{foo}{\bar}
+% generates a command \mkfoocommand such that
+% \mkfoocommand{hello} generates a pair of commands
+% \foohello and \foohellos
+% such that each emits "\bar hello", and the latter a trailing $\;$ to
+% facilitate use in math mode.
+\newcommand{\mkmkcommand}[2]{%
+  \expandafter\newcommand\csname mk#1command\endcsname[2][\relax]{%
+    \expandafter\newcommand\csname #1##2\endcsname{%
+      \helpmkcommand{##1}{##2}{#2}%
+    }%
+    \expandafter\newcommand\csname #1##2s\endcsname{%
+      \helpmkcommand{##1}{##2}{#2}\;%
+    }%
+  }
+}
+
+\mkmkcommand{tt}{\tt}
+\mkmkcommand{kw}{\bf}
+\mkmkcommand{t}{\tt}
+
+% Interactive commands
+\mkttcommand{solve}
+\mkttcommand{intros}
+\mkttcommand{split}
+\mkttcommand{by}
+\mkttcommand{unbox}
+\mkttcommand{as}
+\mkttcommand{case}
+\mkttcommand{msplit}
+\mkttcommand{impossible} % implementation-only
+\mkttcommand{invert} % implementation-only
+\mkttcommand{suffices}
+%
+%\mkttcommand[suffices$\;$by]{sufficesby}
+%\mkttcommand[to$\;$show]{toshow}
+
+
+% Proof script keywords
+\mkkwcommand{solve}
+\mkkwcommand{unbox}
+\mkkwcommand{intros}
+\mkkwcommand{split}
+\mkkwcommand{case}
+\mkkwcommand{by}
+\mkkwcommand{as}
+\mkkwcommand{suffices}
+\mkkwcommand[suffices$\;$by]{sufficesby}
+\mkkwcommand[to$\;$show]{toshow}
+
+% Beluga program keywords
+\mktcommand{in}
+\mktcommand{let}
+\mktcommand[let$\,$box]{letbox}
+\mktcommand{case}
+\mktcommand{of}
+\mktcommand{fn}
+\mktcommand{mlam}
+
+\newcommand{\const}[1]{\textbf{#1}}
+% Helper for formatting Harpoon hypotheticals.
+\newcommand{\hypoth}[2]{\{ #1 \proves #2 \}}
+
+% For Beluga case expression branches, mlam, fn, etc.
+\newcommand{\bto}{\Rightarrow}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% JUDGMENTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \declarejudgment{judgment}{explanation}
+% formats a small table with the judgment on the left and the explanation on the
+% right.
+% If <judgment> is math, you need to use $...$ yourself.
+\newcommand{\declarejudgment}[2]{%
+  \begin{tabular}{>{\centering\arraybackslash}m{0.35\linewidth}m{0.649\linewidth}}
+    #1 & #2
+  \end{tabular}%
+}
+
+% Multiline form for big judgments
+\newcommand{\declarejudgmentmulti}[2]{%
+  \begin{center}
+    #1
+
+    #2
+  \end{center}
+}
+
+%%%%%%%%%% BELUGA type checking and synthesis judgments.
+
+\newcommand{\belchkjudg}[3]{%
+  #1 \proves #2 \chk #3
+}
+\newcommand{\belsynjudg}[3]{%
+  #1 \proves #2 \syn #3
+}
+
+% Special turnstiles to distinguish proofs from directives in typing rules.
+\newcommand{\prfproves}{\proves_\mathbf{P}}
+\newcommand{\dirproves}{\proves_\mathbf{D}}
+
+%%%%%%%%%% HARPOON proof script / directive typing judgments
+
+% The contexts come together in the first argument.
+\newcommand{\prfchkjudg}[3]{%
+  #1 \prfproves #2 \chk #3
+}
+
+% As before, contexts come together in the first argument.
+\newcommand{\dirchkjudg}[3]{%
+  #1 \dirproves #2 \chk #3
+}
+
+%%%%%%%%%% HARPOON translation judgments
+
+% Harpoon proof translation judgment.
+\newcommand{\prftransjudg}[4]{%
+  #1 \prfproves #2 \transto #3 \chk #4
+}
+
+% Harpoon directive translation judgment.
+\newcommand{\dirtransjudg}[4]{%
+  #1 \dirproves #2 \transto #3 \chk #4
+}
+
+%%%%%%%%%% INTERACTIVE HARPOON transition judgments
+\newcommand{\outa}[2]{(\Lambda #1 .~#2)}
+% \itransjudg{goal}{proof}{proof'}{new subgoals}
+\newcommand{\itransjudg}[4]{%
+  #1 \overset{#2}{\itrans} #3 \proves #4
+% #1 \vdash #2 : \outa{#3}{#4}
+}
+
+\newcommand{\itrnsjudg}[5]{%
+%  #1 \overset{#2}{\itrans} #3 \proves #4
+#1 \vdash #3 : #2 \itrans #4 \vdash #5
+% #1 \vdash #2 : \outa{#3}{#4}
+}
+
+% Interactive transition chain judgment
+% \itranssjudg{initial subgoals}{initial proof}{commands}{final
+% subgoals}{final proof}
+
+\newcommand{\itranssjudg}[5]{%
+  % Just reuse the single-step judgment since we don't really need to use the
+  % star arrow
+  \itransjudg{#1 \proves #2}{#3}{#4}{#5}
+  %#1 \proves #2 \itranss{#3} #4 \proves #5
+}
+
+\newcommand{\unrolljudg}[4]{%
+  g : #1 \mid #2 \proves #4 \oute #3
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TIKZ
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathmorphing, arrows}
+
+% Draws a line across the current box.
+% Used to format "inference rules" for Harpoon proof steps.
+\newcommand{\linewidthline}{%
+  \tikz{\draw (0, 0) -- (\linewidth, 0)}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Example step cross-references
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{float}
+
+\newcounter{proofnum}
+\newfloat{HarpoonProof}{H}{harpoon-proofs}
+\floatname{HarpoonProof}{\bfseries \Harpoon{} example}
+
+
+\setcounter{proofnum}{0}
+\newcounter{stepnum}
+\setcounter{stepnum}{0}
+
+\newcommand{\NextHarpoonProof}{%
+  \setcounter{stepnum}{0}
+  \stepcounter{proofnum}%
+  % make listings tighter
+  \lstset{%
+    belowskip=-0.3\baselineskip,
+    aboveskip=-0pt
+  }
+}
+
+\newcommand{\NextHarpoonProofCont}{%
+  \stepcounter{proofnum}%
+}
+
+% \let\theOldStepnum\thestepnum
+% \renewcommand{\thestepnum}{%
+%   \number\value{proofnum}.\theOldStepnum%
+% }
+\newcommand{\labelstep}[1]{%
+  % \phantomsection%
+  \stepcounter{stepnum}
+  \def\@currentlabel{\thestepnum}
+  \phantomsection
+  \label{step:#1}%
+}
+\newcommand{\step}[1]{%
+  \bfseries
+  \labelstep{#1}\centering Step \arabic{stepnum}
+}
+
+%%%%%%%%%% MISCELLANEOUS
+
+\newcommand{\meh}[1]{{\color{red}#1}}
+
+%%%%%%%%%% END
+
+\makeatother
+
+%%% Local Variables:
+%%% TeX-master: "main.tex"
+%%% End:

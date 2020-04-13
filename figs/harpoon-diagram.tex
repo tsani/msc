@@ -1,0 +1,24 @@
+\begin{tikzpicture}
+
+ \node[] (Box0) {
+   \begin{tabular}{p{2cm}}
+Specification \\[0.5em] \textbf{Statement}
+   \end{tabular}
+};
+
+ \node[node distance=2.6cm, right= of Box0, block] (Box1) {
+   \begin{tabular}{p{4cm}}
+     Specification \\[0.5em] \textbf{Statement}
+   \end{tabular}
+   \nodepart{two} Proof  script};
+
+ \node[node distance=2cm, right= of Box1, block] (Box2) {
+   \begin{tabular}{p{4cm}}
+     Specification \\[0.5em] \textbf{Statement}
+   \end{tabular}
+   \nodepart{two} Program};
+
+ \path[pil,draw] (Box0) edge node[above] (label) {action} (Box1);
+ \path[pil,draw] (Box1) -- (Box2);
+
+\end{tikzpicture}

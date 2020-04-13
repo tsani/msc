@@ -1,0 +1,57 @@
+% \NextHarpoonProofCont
+\tightlistings
+\centering
+
+\begin{tabular}{p{5.5cm}|@{~~}p{7cm}}
+  \step{bwd:arr-invert} & \step{bwd:arr-by-suffices}
+  \tabularnewline
+
+  \begin{lstlisting}
+Meta-context:
+  T1 : (|-tp)
+  T2 : (|-tp)
+  M  : (|-tm (arr T1 T2))
+  M' : (|-tm (arr T1 T2))
+Computational context:
+  s  : [|-step M M']
+  r  : Reduce [|-arr T1 T2][|-M']
+$~$
+$~$
+$~$
+\end{lstlisting}
+\linewidthline
+\begin{lstlisting}
+Reduce [|-arr T1 T2][|-M]
+> split r
+  \end{lstlisting}
+  &
+  \begin{lstlisting}
+Meta-context:
+  T1 : (|-tp)
+  T2 : (|-tp)
+  M  : (|-tm (arr T1 T2))
+  M' : (|-tm (arr T1 T2))
+Computational context:
+  s  : [|-step M M']
+  rn : {N : ( |-tm T)} Reduce [|-N][|-T]
+    -> Reduce [|-T2][|-app M' N]
+  h' : [|-halts M']
+  r  : Reduce [|-arr T1 T2][|-M']
+\end{lstlisting}
+\linewidthline
+\begin{lstlisting}
+Reduce [|-arr T1 T2][|-M]
+> suffices by Arr
+1> [|-halts M]
+2> {N : ( |-tm T1)}Reduce [|-T1][|-N]
+   -> Reduce [|-T2][|-app M N]
+  \end{lstlisting}
+\end{tabular}
+
+
+\caption{Backwards closed lemma: Step Case}
+\label{fig:bwd-closed-harpoon-step-part}
+
+%%% Local Variables:
+%%% TeX-master: "../main.tex"
+%%% End:

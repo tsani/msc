@@ -1,0 +1,74 @@
+\NextHarpoonProof
+\centering
+
+\begin{tabular}{p{.30\textwidth}|p{.30\textwidth}|p{.36\textwidth}}
+  \step{hs:split-h} & \step{hs:unbox} & \step{hs:solve} \tabularnewline
+\begin{lstlisting}
+Meta-context:
+  T : ( |- tp)
+  M : ( |- tm T)
+  M' : ( |- tm T)
+
+
+
+
+Computational context:
+  s : [ |- step M M']
+  h : [ |- halts M']
+\end{lstlisting}
+\linewidthline
+\begin{lstlisting}
+[ |- halts M]
+> split h
+\end{lstlisting}
+    &
+\begin{lstlisting}
+Meta-context:
+  T : ( |- tp)
+  M : ( |- tm T)
+  M' : ( |- tm T)
+  M2 : ( |- tm T)
+  S : ( |- mstep M' M2)
+  V : ( |- val M2)
+
+Computational context:
+  s : [ |- step M M']
+  h : [ |- halts M']
+\end{lstlisting}
+\linewidthline
+\begin{lstlisting}
+[ |- halts M]
+> unbox s as S'
+\end{lstlisting}
+&
+\begin{lstlisting}
+Meta-context:
+  T : ( |- tp)
+  M : ( |- tm T)
+  M' : ( |- tm T)
+  M2 : ( |- tm T)
+  S : ( |- mstep M' M2)
+  V : ( |- val M2)
+  S' : ( |- step M M')
+Computational context:
+  s : [ |- step M M']
+  h : [ |- halts M']
+\end{lstlisting}
+\linewidthline
+\begin{lstlisting}
+[ |- halts M]
+> solve
+  [|-halts/m (next S' S) V]
+\end{lstlisting}
+
+\end{tabular}
+
+\caption{%
+  Interactive session of the proof for the 
+  \lstinline!halts_step! lemma.
+}
+\label{fig:halt-harpoon}
+
+%%% Local Variables:
+%%% TeX-master: "../main.tex"
+%%% End:

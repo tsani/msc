@@ -1,0 +1,102 @@
+\chapter{Evaluation}
+\label{sec:evaluation}
+
+One should be able to use \Harpoon{} to prove anything that one could prove in
+\Beluga. A proper completeness theorem is for now too complex\footnotemark, so
+instead we have replicated a number of case studies originally proven as
+functional programs in \Beluga. (See table~\ref{table:evaluation}.)
+\footnotetext{%
+  \Beluga's support for deep pattern matching complicates a potential
+  completeness proof.
+}
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{%
+    m{0.4\textwidth} m{0.4\textwidth} %m{0.1\textwidth}
+    }
+    Case study
+    & Main feature tested
+    % & Remarks
+    \\ \hline
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Examples from \textit{a framework for defining logics}
+    % & Unboxing computational variables
+    % & \multicolumn{1}{c |}{\---}
+    % \\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Length of context
+    % & Splitting on context
+    % & \multicolumn{1}{c |}{\ref{itm:evaluation-remark1}}
+    % \\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    MiniML value soundness
+    & Automatic solving of trivial goals
+    % & \multicolumn{1}{c}{\ref{itm:evaluation-remark1}}
+    \\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    MiniML compilation completeness
+    & Unboxing program variables
+    % & \multicolumn{1}{c}{\ref{itm:evaluation-remark3}}
+    \\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    STLC type preservation
+    & Automatic solving of trivial goals
+    % & \multicolumn{1}{c}{\ref{itm:evaluation-remark5}}
+    \\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    STLC type uniqueness
+    & Open term manipulation
+    % & \multicolumn{1}{c}{\ref{itm:evaluation-remark5}}
+    \\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    STLC weak normalization
+    & Advanced splitting
+    % & \multicolumn{1}{c}{\ref{itm:evaluation-remark5}}
+    \\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    STLC strong normalization \cite{POPLMarkReloaded:19}
+    & Large development
+    % & \multicolumn{1}{c}{\ref{itm:evaluation-remark5}}
+    \\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    STLC alg. equality completeness \cite{Cave:MSCS18}
+    & Large development
+    % & \multicolumn{1}{c}{\ref{itm:evaluation-remark5}}
+    \\
+    %
+  \end{tabular}
+
+  \caption{%
+    Summary of proofs ported to \Harpoon{} from \Beluga.
+  }
+  \label{table:evaluation}
+\end{table}
+
+The first four examples are purely syntactic arguments that proceed by
+straightforward induction.
+The remaining examples involve more sophisticated features from \Beluga's
+computation language such as inductive and stratified types used to encode
+logical relations.
+
+Recreating these case studies in \Harpoon{} was straightforward and provided us
+with insight as to future work regarding automation. In the syntactic case
+studies, proofs tend to proceed by case analysis on the induction variable,
+inverting any other assumptions when possible, invoking available induction
+hypotheses, and applying a few inference rules. This general recipe could be
+automated in whole or in part to simplify the development of similar simple
+proofs.
+
+% \begin{enumerate}
+% \item\label{itm:evaluation-remark1}
+%   All solve commands include only two or less terms; with more automation tactic this example may be solved automatically.
+% \item\label{itm:evaluation-remark3}
+%   This uses a lot of unbox tactic. Providing a way to automate unbox tactic may be helpful.
+% \item\label{itm:evaluation-remark5}
+%   Auto invert tactic would simplify this example.
+% \end{enumerate}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main.tex"
+%%% End:

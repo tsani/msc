@@ -1,0 +1,114 @@
+\declarejudgmentmulti{%
+  $\boxed{\prftransjudg{\Omega \mid \goalctx{}}{P}{e}{\tau}}$
+}{%
+  Proof $P$ is translates to \Beluga{} term $e$
+}
+%
+\[
+  \begin{array}{c}
+  % switch from proof to directive
+  \infer{%
+    \prftransjudg{\Omega \mid \goalctx{}}{D}{e}{\tau}
+  }{%
+    \dirtransjudg{\Omega \mid \goalctx{}}{D}{e}{\tau}
+  }
+  \quad
+  % subgoal variable
+  \infer{%
+    \prftransjudg{g : \goal{} \mid \goalctx{}}{g}{g}{\tau}
+  }{}
+    \\[1em]
+  % by command
+  \infer{%
+    \prftransjudg{\Omega \mid \goalctx{}}{\kwbys i\;\kwass x; P}{\tlets x = i\;\tins e}{\tau}
+  }{%
+    \belsynjudg{\cdot \mid \goalctx{}}{i}{\tau^\prime}
+    &
+    \prftransjudg{\Omega \mid \Delta; \Gamma, x : \tau^\prime}{P}{e}{\tau}
+  }
+      \\[1em]
+  % unbox command
+  \infer{%
+    \prftransjudg{\goalctx{}}{\kwunboxs i\;\kwass X; P}{%
+      \tletboxs X = i\;\tins e
+    }{\tau}
+  }{%
+    \belsynjudg{\cdot \mid\goalctx{}}{i}{[U]}
+    &
+    \prftransjudg{\Omega \mid \Delta, X{:}U; \Gamma}{P}{e}{\tau}
+  }
+  \end{array}
+\]
+
+~
+
+\declarejudgment{%
+  $\boxed{\dirtransjudg{\goalctx{}}{D}{e}{\tau}}$
+}{%
+  Directive $D$ translates to \Beluga{} term $e$
+}
+
+\[
+  \begin{array}{c}
+  % solve command
+  \infer{%
+    \dirtransjudg{\cdot \mid \goalctx{}}{\kwsolves e}{e}{\tau}
+  }{\belchkjudg{\cdot \mid \goalctx }{e}\tau}
+    \\[1em]
+  \infer{%
+    \dirtransjudg{\Omega \mid \goalctx{}}{%
+      \kwintross \hypoth{\goalctx{^\prime}}{P}%
+    }{\psubst{e^\prime/g}{e}}{\tau}
+  }{%
+    \unrolljudg{\goal{^\prime}}{\goalctx{}}{e}{\tau}
+    &
+    \prftransjudg{\Omega \mid \goalctx{^\prime}}{P}{e^\prime}{\tau^\prime}
+  }
+    \\[1em]
+  \infer{%
+    \dirtransjudg{\Union_k \Omega_k \mid \goalctx{}}{%
+      \kwsplits i\;\kwass \vec{\hypoth{\goalctx{_k}}{P_k}}
+    }{%
+      \tcases i\;\tofs \vec{p_k \bto e_k}
+    }{\tau}
+  }{%
+    \begin{array}{l}
+    \belsynjudg{\cdot\mid\goalctx{}}{i}{\beta}
+      \quad
+    \scovs (\Delta; \Gamma; \beta) =
+    \vec{(p_k; \theta_k; \Delta_k; \Gamma_k)}
+      \\
+    \text{for all $k$. }
+    \prftransjudg{\Omega_k \mid \goalctx{_k}}{P_k}{e_k}{%
+      \msubst{\theta_k}{\tau}%
+    }
+    \end{array}
+  }
+      \\[1em]
+  % suffices command
+  \infer{%
+    \dirtransjudg{\Union_k \Omega_k \mid \goalctx{}}{%
+      \kwsuffices\;i\;\kwbys \vec{\tau_k \;\kwass P_k}
+    }{i\;\vec{C_j}\;\vec{e_k}}{\tau_0}}
+   {%
+     \begin{array}{l}
+       \belsynjudg{\cdot \mid \goalctx{}}{i}{%
+         \Pi \Delta^\prime.\,
+         \tau_n^\prime \to \ldots \to \tau_1^\prime \to \tau_0^\prime%
+       }
+       \quad
+       \Delta \vdash \theta : \Delta, \Delta^\prime
+       \\
+       \Delta \vdash \msubst{\theta}{\tau_k^\prime} = \tau_k
+       \quad
+       \dirtransjudg{\Omega_k \mid \goalctx{}}{P_k}{e_k}{\tau_k}
+     \end{array}
+  }
+    \end{array}
+\]%
+\mbox{where} $\theta = C_1/X_1, \ldots C_m/X_m$%
+%
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main.tex"
+%%% End:

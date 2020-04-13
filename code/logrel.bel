@@ -1,0 +1,6 @@
+stratified Reduce : {A : [⊢ tp]} [⊢ tm A] → ctype =
+  | Unit : [⊢ halts M] → Reduce [⊢ unit] [⊢ M]
+  | Arr : [⊢ halts M] →
+          ( {N : [⊢ tm A]} Reduce [⊢ A] [⊢ N] →
+            Reduce [⊢ B] [⊢ app M N] ) →
+          Reduce [⊢ arr A B ] [⊢ M];

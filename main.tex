@@ -1,0 +1,39 @@
+\documentclass[letter, 12pt, oneside]{book}
+
+% Load all custom commands and advanced configuration.
+\input{prelude.tex}
+
+\renewcommand{\title}{Mechanizing Metatheory Interactively}
+\renewcommand{\author}{Jacob Thomas Errington}
+%
+\newcommand{\authorrunning}{J.~Errington et al.}
+\newcommand{\titlerunning}{\title}
+
+\begin{document}
+
+\input{chapters/title-page}
+%
+\input{chapters/abstract}
+%
+\input{chapters/intro}
+%
+\input{chapters/example}
+%
+\input{chapters/syntax}
+%
+\input{chapters/evaluation}
+%
+\input{chapters/conclusion}
+
+% END of paper body
+
+\bibliographystyle{plain} % TODO
+
+\bibliography{bibi-extract}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

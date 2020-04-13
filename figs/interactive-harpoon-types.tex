@@ -1,0 +1,67 @@
+\declarejudgment{%
+  $\boxed{
+\itrnsjudg{\Delta;\Gamma}{\tau}{\action}{\Omega}{P}
+}$
+}{%
+  Command $\action$ applied to subgoal $\goal{}$
+  produces an incomplete proof script $P$ with open subgoals $\Omega$.
+}
+
+\[
+  \begin{array}{c}
+  \infer{%
+    \itrnsjudg{\Delta;\Gamma}{\tau}{\ttsolves e}{\cdot}{\kwsolves e}
+  }{%
+    \belsynjudg{\cdot\mid\goalctx{}}{e}{\tau}
+  }
+    \\[1em]
+  \infer{%
+    \itrnsjudg{\Delta;\Gamma}{\tau}{\ttintros}{g : \goalwith {\goalctx{^\prime}} \beta}{%
+      \kwintross \hypoth{\goalwith {\goalctx{^\prime}} \beta}{g}
+    }
+  }{%
+    \unrolljudg{\goalwith {\goalctx{^\prime}} \beta}{\goalctx{}}{e}{\tau}
+  }
+\\[1em]
+  \renewcommand{\goal}[1]{(\Delta; \Gamma#1 \proves \tau)}
+  \newcommand{\cmd}{\ttbys i\;\ttass x}
+  \infer{%
+    \itrnsjudg{\Delta;\Gamma}{\tau}{\ttbys i\;\ttass x}{g : \goal{, x : \tau^\prime}}{%
+      \kwbys i\; \kwass x; g
+    }
+  }{%
+    \belsynjudg{\cdot \mid \Delta; \Gamma}{i}{\tau^\prime}
+  }
+\\[1em]
+  \newcommand{\cmd}{\ttsplits i}
+  \newcommand{\prf}{\kwsplits i\;\kwass\vec{\hypoth{\goalctx{_k}}{g_k}}}
+  \newcommand{\gOmega}{g_k : (\goalctx{_k} \proves \msubst{\theta_k}{\tau})}
+  \infer{%
+    \itrnsjudg{\Delta;\Gamma}{\tau}{\cmd}{\vec{\gOmega}}{\prf}
+  }{%
+    \belsynjudg{\cdot \mid \Delta; \Gamma}{i}{\beta}
+    &
+    % \scovs (\Delta; \Gamma; \tau^\prime) = \vec{\gOmega}
+    \scovs (\goalctx{}; \beta) = \vec{(\_; \theta_k; \Delta_k; \Gamma_k)}
+  }
+\\[1em]
+  \newcommand{\kOmega}{g_k : (\goalctx{} \proves \tau_k)}
+\infer{%
+\itrnsjudg{\Delta ; \Gamma}{\tau_0}{\ttsuffices~i~\ttbys \vec{\tau_k}}
+    {\vec{\kOmega}}{\kwsufficesbys~i~\kwtoshows \vec{k$\!\,$\mbox{\texttt{>}}~ g_k}}
+}
+{\belsynjudg{\cdot \mid \goalctx{}}{i}{\Pi \Delta^\prime.\tau^\prime_n \to \ldots \to
+      \tau^\prime_1 \to \tau_0^\prime}
+&
+ \Delta \vdash \theta :  (\Delta,\Delta^\prime) &
+ \Delta \vdash \msubst{\theta}{\tau_k^\prime} = \tau_k &
+    \Delta \vdash \msubst{\theta}{\tau^\prime_0} = \tau_0
+}
+  \end{array}
+\]
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main.tex"
+%%% End:

@@ -1,0 +1,89 @@
+\NextHarpoonProof
+\centering
+
+\newcommand{\cwidthOne}{0.33\textwidth}
+\newcommand{\cwidthTwo}{0.33\textwidth}
+\newcommand{\cwidthThree}{0.34\textwidth}
+
+\newenvironment{eventable}{%
+  \begin{tabular}{p{\cwidthOne}|p{\cwidthTwo}|p{\cwidthThree}}%
+    }{%
+  \end{tabular}
+}
+
+\begin{eventable}
+  % STEPS 1 2 3
+  \step{bwd:msplit-T} & \step{bwd:b-invert-r} & \step{bwd:b-solve} \tabularnewline
+
+% STEP 1
+\begin{lstlisting}
+Meta-context:
+  T : ( |- tp )
+  M : ( |- tm T )
+  M' : ( |- tm T )
+Computational context:
+  s : [|-step M M']
+  r : Reduce [|-T] [|-M']
+$~$
+\end{lstlisting}
+
+\linewidthline
+
+\begin{lstlisting}
+Reduce [|-T] [|-M]
+> msplit T
+\end{lstlisting}
+  &
+
+% STEP 2
+\begin{lstlisting}
+Meta-context:
+  M : ( |- tm b )
+  M': ( |- tm b )
+
+Computational context:
+  s : [|-step M M']
+  r : Reduce [|-b] [|-M']
+$~$
+\end{lstlisting}
+
+\linewidthline
+
+\begin{lstlisting}
+Reduce [|-b] [|-M]
+> split r
+\end{lstlisting}
+&
+% STEP 3
+\begin{lstlisting}
+Meta-context:
+  M : ( |- tm b )
+  M': ( |- tm b )
+
+Computational context:
+  s : [|-step M M']
+  h': [|-halts M' ]
+  r : Reduce [|-b] [|-M']
+\end{lstlisting}
+\linewidthline
+\begin{lstlisting}
+Reduce [|-b] [|-M]
+> by halts_step s h' as h; 
+  solve Unit h
+\end{lstlisting}
+\end{eventable}
+
+
+
+\caption{%
+%   Interactive session 
+% Part A of the
+  Backwards closed lemma. Step 1: Case analysis of the type
+  \lstinline!T!; Steps 2 and 3: Base case (\lstinline!T!~$=$~\lstinline!b!).
+%  (This session continues in example~\ref{fig:bwd-closed-harpoon-step}.)
+}
+\label{fig:bwd-closed-harpoon}
+
+%%% Local Variables:
+%%% TeX-master: "../main.tex"
+%%% End:

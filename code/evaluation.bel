@@ -1,0 +1,13 @@
+LF step : tm A -> tm A -> type =
+  | s_app_1 : step M M' → step (app M N) (app M' N)
+  | s_app : step (app (lam M) N) (M N);
+--name step S.
+
+LF steps : tm A → tm A → type =
+  | next : step M M' → steps M' N → steps M N
+  | refl : steps M M;
+--name steps E.
+
+LF halts : tm A → type =
+  | halts/m : value V → steps M V → halts M;
+--name halts H.

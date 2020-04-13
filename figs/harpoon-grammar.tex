@@ -1,0 +1,22 @@
+\[
+  \begin{grammar}
+    \category{Proof Script}{P}{%
+      g \galt
+      D \galt
+      \kwbys i\;\kwass x; P \galt
+      \kwunboxs i\;\kwass X; P
+    }
+    \category{Directives}{D}{%
+      \kwsolves e \galt
+      \kwintross \hypoth{\goalctx{}}{P} \galt
+      \kwsplits i\;\kwass \vec{\hypoth{\goalctx{_k}}{P_k}}
+    }
+    \continue{%
+      \kwsufficesbys i\;\kwtoshows \vec{(k$\!\,$\mbox{\texttt{>}}~\tau_k \;\kwass P_k)}
+    }
+  \end{grammar}
+\]
+
+%%% Local Variables:
+%%% TeX-master: "../main.tex"
+%%% End:

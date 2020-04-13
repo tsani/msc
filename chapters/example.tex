@@ -1,0 +1,414 @@
+
+\renewcommand*{\arraystretch}{0.3}
+\chapter{Proof Development in \Harpoon}
+\label{sec:example}
+
+We introduce the main features of \Harpoon{} by considering two
+lemmas that play a central role in proof of weak normalization of
+the simply-typed lambda calculus.
+First, the Termination Property states that if
+well-typed term \lstinline!M'! halts and \lstinline!M!
+reduces to \lstinline!M'!, then \lstinline!M'! halts.
+Second, the Backwards Closed Property states that if a well-typed term
+\lstinline!M'! is reducible and \lstinline!M! reduces to \lstinline!M'!, then
+\lstinline!M! is also reducible.
+
+\inlinetodo{%
+  Conduct the proof ``on paper'' first, and then show the mechanization with
+  Harpoon?%
+}
+
+\section{Initial setup: encoding the language}
+We begin by defining the simply-typed lambda-calculus in the logical
+framework LF \cite{Harper93jacm} using an intrinsically typed
+encoding.
+In typical HOAS style, lambda abstraction takes an LF function representing the
+abstraction of a term over a variable. There is no case for variables, as they
+are treated implicitly.
+We remind the reader that this is a weak, representational function space~--~%
+there is no case analysis or recursion, so only genuine lambda terms can
+be represented.
+%
+\begin{center}
+\begin{tabular}{ll}
+\begin{lstlisting}
+LF tp : type =
+  | unit: tp
+  | arr : tp -> tp -> tp;
+\end{lstlisting}
+  &
+\begin{lstlisting}
+LF tm : tp -> type =
+  | lam : (tm T1 -> tm T2) -> tm (arr T1 T2)
+  | app : tm (arr T1 T2) -> tm T1 -> tm T2;
+\end{lstlisting}
+\end{tabular}
+\end{center}
+%
+Free variables such as \lstinline!T1! and \lstinline!T2! are
+implicity universally quantified (see \cite{Pientka:JFP13})
+and programmers subsequently do not supply arguments for
+implicitly quantified parameters when using a constructor.
+
+% In typical higher-order abstract syntax  fashion, the \lstinline!lam!
+% constructor takes  an LF function,
+% \lstinline!tm A -> tm B!,
+% representing  the abstraction of a
+% term over a variable.
+% There is no case for variables, as they are treated implicitly.
+% We
+% remind the reader that this is a weak, representational function space
+% – there is no case analysis or recursion, and hence only genuine lambda terms can be repre-sente
+
+
+
+% The \lstinline!schema! construct declares a new \emph{schema} \lstinline!ctx!:
+% whereas types classify values, schemas classify contexts in \Beluga. If we view
+% a context as a map whose domain is a set of variables, then a schema declaration
+% specifies the codomain of the contexts belonging to that schema.
+
+With the syntax out of the way, we define a small-step operational semantics for
+the language. For simplicity, we use a call-by-name reduction
+strategy and do not reduce under lambda-abstractions.
+%
+\begin{center}
+  \begin{tabular}{ll}
+\begin{lstlisting}
+LF step : tm T -> tm T -> type =
+  | s_app   : step M M' →
+              step (app M N) (app M' N)
+  | s_beta : step (app (lam M) N) (M N);
+\end{lstlisting}
+    &
+\begin{lstlisting}
+LF steps : tm T → tm T → type =
+  | next : step M M' → steps M' N →
+            steps M N
+  | refl : steps M M;
+\end{lstlisting}
+  \end{tabular}
+\end{center}
+%
+Notice in particular that we use LF application to encode the
+object-level substitution in the \lstinline!s_beta! rule.
+We define a predicate \lstinline!val: tm T -> type! on well-typed terms expressing what it
+means to be a value: \lstinline!v_lam: val (lam M)!.
+Last, we define a notion of termination: a term halts if it reduces to a value. This is captured by the constructor \lstinline!halts/m!.
+\begin{center}
+  \begin{tabular}{l}
+\begin{lstlisting}
+LF halts : tm T → type = halts/m : val V → steps M V → halts M;
+\end{lstlisting}
+  \end{tabular}
+\end{center}
+
+\section{%
+  Termination Property: tactics \ttintros, \ttsplit, \ttunbox, and \ttsolve%
+}
+\label{sec:halts-step}
+
+As the first short lemma, we show the Termination Property, that if
+\lstinline!M'! is known to halt and \lstinline!steps M M'!, then \lstinline!M!
+also halts.
+We start our interactive proof session by loading the signature and defining the
+name of the theorem and the statement that we want to prove.
+
+\begin{lstlisting}[language=Beluga, deletekeywords={of}]
+  Name of theorem (empty name to finish): halts_step
+  Statement of theorem: [ |- step M M'] -> [ |- halts M'] -> [ |- halts M]
+\end{lstlisting}
+
+\Beluga{} is a proof environment in which an encoded theory is clearly separated
+from its metatheory.
+LF objects encoding the syntax or judgments from a theory are embedded within
+\Beluga{} using the ``box'' syntax \lstinline![ |- ]!.
+Furthermore, we embed such LF objects together with the LF context in which they
+are meaningful \cite{Pientka:POPL08,Pientka:PPDP08,Nanevski:ICML05}.
+We call such an object paired with its context a \emph{contextual object}.
+In this example, the LF context, written on the left of \lstinline!|-!, is
+empty as we consider closed LF objects.
+
+Whereas a judgment of an encoded
+theory is represented as an LF type, a metatheoretic statement is represented as
+a \Beluga{} type. As is often the case, implications are modelled using simple
+functions written with \lstinline!->!.
+As before, the free variables \lstinline!M! and \lstinline!M'! are implicitly
+bound by $\Pi$-types at the outside, which correspond to universal
+quantification.
+In terms of expressiveness, \Beluga{} is comparable to a first-order logic with
+fixed points together with LF as an index domain.
+
+With theorem configuration out of the way, the proof begins with a single
+subgoal whose type is simply the statement of the theorem under no
+assumptions.
+Since this subgoal has a function type, \Harpoon{} will automatically apply the
+\lstinline!intros! tactic:
+first, the (implicitly) universally quantified variables
+\lstinline!M!, \lstinline!M'! are added to the meta-context;
+second, the assumptions \lstinline!s : [|- step M M']! and
+\lstinline!h : [|- halts M']! are added to the program context.
+Observe that since \lstinline!M! and \lstinline!M'! have type \lstinline!tm T!,
+\lstinline!intros! also adds \lstinline!T! to the meta-context, although it is
+implicit in the definitions of \lstinline!step! and \lstinline!halts! and is not
+visible.
+(See \Harpoon{} example ~\ref{fig:halt-harpoon} Step \ref{step:hs:split-h}.)
+
+\begin{HarpoonProof}[ht] % halts_step proof: three steps
+  \input{figs/halts-step-proof}
+\end{HarpoonProof}
+
+The proof proceeds by inversion on \lstinline!h!.
+Using the \lstinline!split! tactic, we add the two new
+assumptions \lstinline!S:(|- steps M' M2)! and
+\lstinline!V:(|- val M2)!
+to the meta-context. %
+(See \Harpoon{} example~\ref{fig:halt-harpoon} Step~\ref{step:hs:split-h}.) %
+%Alternatively, since we expect there to be only one case as we reason here by
+%inversion, we could have used the \lstinline!invert! tactic to capture this
+%intent. It is identical to \lstinline!split! internally, but it checks that a
+%unique case is produced by splitting.
+%
+To build a proof for \lstinline![|- halts M]!, we need to show that
+there is a step from \lstinline!M! to some value \lstinline!M2!. To
+build such a derivation, % using the LF constant \lstinline!next!,
+we use first the \lstinline!unbox! tactic on the computation-level
+assumption \lstinline!s! to obtain an assumption \lstinline!S'! in the
+meta-context which is accessible to the LF layer.
+(See \Harpoon{} example~\ref{fig:halt-harpoon} Step~\ref{step:hs:unbox}.)
+%
+%
+Finally, we can finish the proof by supplying the term
+\lstinline![ |- halts/m (next S' S) V]!
+% , which is a proof for \lstinline![ |- halts M]!.
+(See \Harpoon{} example~\ref{fig:halt-harpoon} Step~\ref{step:hs:solve}.)
+
+
+\section{Setup continued: reducibility}
+We now proceed to define
+% normalization using
+%using reducibility candidates
+%\cite{GirardLafontTaylor:proofsAndTypes}. In essence, we define
+a set of terms \emph{reducible} at a type \lstinline!T!. %
+All reducible terms are required to halt, and terms reducible at an arrow type
+are required to produce reducible output given reducible input.
+Concretely,  a term
+\lstinline!M! is reducible at type \lstinline!(arr T1 T2)!,
+ if for all
+terms \lstinline!N:tm T1! where \lstinline!N! is reducible at type
+\lstinline!T1!, then \lstinline!(app M N)! is reducible at type \lstinline!T2!.
+%This is
+%sometimes phrased as ``if good things go in, then good things come out.'' %
+Reducibility cannot be directly encoded at the LF layer, as it is not
+merely describing the syntax tree of an expression or derivation.
+Instead, we encode the set of reducible terms using the stratified
+type \lstinline!Reduce! which is recursively defined on the type
+\lstinline!T! in \Beluga{} (see \cite{JacobRao:stratified2018}). Note
+that we write \lstinline!{ }! for explicit universal quantification.
+
+\begin{lstlisting}
+stratified Reduce : {T : [⊢ tp]} [⊢ tm T] → type =
+  | Unit: [⊢halts M] → Reduce [⊢unit] [⊢M]
+  | Arr : [⊢halts M] →
+           ({N:[⊢tm T1]} Reduce [⊢T1] [⊢N] → Reduce [⊢T2] [⊢app M N])
+        → Reduce [⊢arr T1 T2] [⊢M];
+\end{lstlisting}
+
+
+% over the closed term \lstinline!N! of type \lstinline!T1!.
+
+
+\section{%
+  Backwards Closed Property: tactics \ttmsplit, \ttsuffices, and \ttby%
+}
+
+
+
+We now consider one of the key lemmas in the weak normalization proof,
+called the backwards closed lemma, i.e.  if \lstinline!M'! is
+reducible at some type \lstinline!T! and \lstinline!M! steps to
+\lstinline!M'!, then \lstinline!M! is also reducible at \lstinline!T!.
+%
+We prove this lemma by induction on \lstinline!T!. This is
+specified by referring to the position of the induction variable in
+the statement.
+
+\begin{lstlisting}[gobble=2, deletekeywords={of}]
+    Name of theorem: bwd_closed
+    Statement of theorem: {T : [|-tp]} {M : [|-tm T]} {M' : [|-tm T]}
+             [|-step M M'] -> Reduce [|-T] [|-M'] -> Reduce [|-T] [|-M]
+    Induction order: 1
+\end{lstlisting}
+
+%The sequence of proof states is shown in \Harpoon{} Proof
+%~\ref{fig:bwd-closed-harpoon} and \Harpoon{} Proof
+%~\ref{fig:bwd-closed-harpoon-step}.
+%
+After \Harpoon{} automatically
+introduces the meta-variables \lstinline!T!, \lstinline!M!,
+and \lstinline!M'! together with an assumption
+\lstinline!s : [|-step M M']! and \lstinline!r : Reduce [|-T] [|-M']!,
+we use \lstinline!msplit T! to split the proof into two cases (see
+\Harpoon{} Proof~\ref{fig:bwd-closed-harpoon}
+Step~\ref{step:bwd:msplit-T}). Whereas \lstinline!split! case analyzes
+a \Beluga{} type, \lstinline!msplit! considers the cases for a
+(contextual) LF type. In reality, \lstinline!msplit! is syntactic sugar for a
+more verbose use the ordinary \lstinline!split! tactic.
+
+%Had we used the ordinary \lstinline!split! tactic, we would have written
+%\lstinline!split [|- T]!; the \lstinline!split! tactic requires a
+%\emph{computational} term, so we would use a box to embed the LF term
+%\lstinline!A! (together with the empty LF context) in the computation
+%language. The tactic \lstinline!msplit! instead infers the necessary LF context,
+%at the expense of allowing splitting on metavariables only.
+
+\begin{HarpoonProof}[htb]
+  \input{figs/bwd-closed-proof}
+\label{fig:bwclosed-base}
+\end{HarpoonProof}
+
+The case for \lstinline!T!~$=$~\lstinline!b! is
+straightforward (see \Harpoon{} Proof~\ref{fig:bwclosed-base} Step
+\ref{step:bwd:b-invert-r} and \ref{step:bwd:b-solve}). First, we use
+the \lstinline!split! tactic to invert the premise
+\lstinline!r : Reduce [|- b] [|- M']!.
+%
+Then, we use the \lstinline!by! tactic to invoke the
+\lstinline!halts_step! lemma (see Sec.~\ref{sec:halts-step}) to obtain
+an assumption \lstinline!h : [|- halts M]!. %
+We \lstinline!solve! this case by supplying the term \lstinline!Unit h! %
+(\Harpoon{} Proof~\ref{fig:bwd-closed-harpoon} Step~\ref{step:bwd:b-solve}). %
+
+\begin{HarpoonProof}[htb]
+  \input{figs/bwd-closed-proof-step-part1}
+\end{HarpoonProof}
+
+In the case for \lstinline!T!~$=$~\lstinline!arr T1 T2!, we begin
+similarly by inversion on \lstinline!r! using the \lstinline!split!
+tactic (\Harpoon{} Proof~\ref{fig:bwd-closed-harpoon-step-part} Step~\ref{step:bwd:arr-invert}).
+% to obtain the assumptions
+%\begin{lstlisting}
+%  h' : [|-halts M']
+%  rn : {N : [|-tm T]} Reduce [|-T] [|-N] -> Reduce [|-T1] [|-app M' N]
+%\end{lstlisting}
+%
+%
+%
+We observe that the goal type is %
+\lstinline!Reduce [|- arr T1 T2] [|- M]!, %
+which can be produced by using the \lstinline!Arr! constructor if we can
+construct a proof for each of the user-specified types,
+\lstinline![⊢halts M]! and
+\lstinline!{N:[⊢tm T1]} Reduce [⊢T1] [⊢N] → Reduce [⊢T2] [⊢app M N]!.
+%
+Such \emph{backwards reasoning} is accomplished via the \lstinline!suffices!
+tactic. The user supplies a term representing an implication whose conclusion is
+compatible with the current goal and proceeds to
+prove its premises as specified
+(see \Harpoon{} Proof \ref{fig:bwd-closed-harpoon-step-part} Step \ref{step:bwd:arr-by-suffices}).
+
+To prove premise \lstinline!1>!, we
+apply the
+\lstinline!halts_step! lemma
+% with \lstinline!h'! and \lstinline!s!
+%  to
+% deduce \lstinline!h : [|- halts M]!
+(\Harpoon{} Proof~\ref{fig:bwd-closed-harpoon-step} Step~\ref{step:bwd:halt}). %
+%
+As for premise \lstinline!2>!, \Harpoon{} first automatically introduces the
+variable \lstinline!N:(|-tm T1)! and the assumption
+\lstinline!r1:Reduce [|-T1] [|-N]!, so it remains to show
+\lstinline!Reduce [|-T2] [|-app M N]!.
+We deduce \lstinline!r':Reduce [|-T2] [|-app M' N]!
+using the assumption
+\lstinline!rn!. Using \lstinline!s:[|- step M M']!, we build a
+derivation \lstinline!s':[|-step (app M N) (app M' N)]! using
+\lstinline!s_app!.
+Finally, we appeal to the induction hypothesis. Using the \lstinline!by!
+tactic, we write out and refer to the recursive call to complete the proof
+(\Harpoon{} Proof~\ref{fig:bwd-closed-harpoon-step} Step~\ref{step:bwd:final}).
+% \Harpoon{} uses this variable to automatically solve the goal.
+
+Note that \Harpoon{} allows users to use underscores to stand for arguments that
+are uniquely determined
+(see \Harpoon{} Proof~\ref{fig:bwd-closed-harpoon-step}
+Step~\ref{step:bwd:final}).
+We enforce that these underscores stand for uniquely determined objects in order
+to guarantee that the contexts and the goal type of every subgoal be
+closed. This ensures modularity: solving one subgoal does not affect any
+other open subgoals.
+% For example, when using the \lstinline!suffices!
+% tactic where the user supplies a term that would solve a given goal
+% provided we have proofs for the listed subgoals, each of those yet to
+% be proven subgoals may not contain any unknowns (holes). For example,
+% in the base case of the backwards closed lemma (see \Harpoon{}
+% Proof~\ref{fig:bwclosed-base} Step \ref{step:bwd:b-solve}), one might
+% wonder if one could have attempted a backwards reasoning step by the
+% action \lstinline!suffices by halts_step!. This would however fail, as
+% it is undetermined where \lstinline!M! steps to and the two generated
+% subgoals would hence contain a hole. On the other hand the action
+% \lstinline!suffices by halts_step s! would succeed and generate the
+% subgoal \lstinline!halts M'!. Enforcing that no generated subgoal can
+% contain unknowns (holes) is a sensible restriction, as we expect every
+% proof step to reach a concrete fully determined proof state, i.e. one
+% that does not contain unknowns.
+
+
+\begin{HarpoonProof}[h]
+  \input{figs/bwd-closed-proof-step}
+\end{HarpoonProof}
+
+Using the explained tactics, one can now prove the fundamental lemma and the weak
+normalization theorem. For a more comprehensive description of this
+proof in \Beluga{} see \cite{Cave:LFMTP13,Cave:MSCS18}.
+
+\section{Additional features}
+
+Besides the tactics already discussed in this section, our
+implementation supports several others.
+%
+Two are variants on \lstinline!split!. First, the \lstinline!invert! tactic
+splits on the type of a given term, but checks that the split produces a unique case. Second, the
+\lstinline!impossible! tactic verifies that the split produces no cases, so the
+supplied term's type is empty.
+
+The \lstinline!strengthen! tactic can be used to strengthen the contextual type
+of a given declaration according to a type subordination analysis \cite{something}.
+This tactic is essential in the completeness proof for algorithmic equality
+\cite{Cave:MSCS18}.
+
+We also support a number tactics that do not contribute to the elaboration of
+the proof, called \emph{administrative tactics.}
+Many of these are for navigating and listing theorems and subgoals.
+Besides navigation commands, we include an \lstinline!undo!
+tactic for rolling back previous steps in a proof.
+
+Our implementation also performs some rudimentary automation to detect
+available assumptions that match the current goal type. Already, this is quite
+convenient as it automatically eliminates certain trivial subgoals from proofs.
+
+% Our
+%implementation also automatically invokes \ttintros{} when the goal is
+%a function type.
+
+%\subsection{The Main Theorem: Fundamental Lemma}
+% Proving that all well-typed terms halt is now done in two parts.  Clearly, any
+% reducible term halts by definition. Therefore, the challenging part of the
+% argument is to show that all well-typed terms \lstinline!M : tm A! are
+% reducible, i.e. \lstinline!Reduce [ |- A] [ |- M]!. As well-typed terms may be
+% open, we need to generalize the statement: ``for any reducible substitution
+% $\sigma$, all well-typed terms $\Gamma \vdash$ \lstinline!M : tm A! are
+% reducible, i.e.  \lstinline!Reduce [|- A] [|- M[sigma]]!'', where a
+% \emph{reducible substitution} is a map from variables to reducible terms.  This
+% is elegantly handled in \Beluga{} using the built-in support for substitutions,
+% but does not require any new tactics.
+
+% The fundamental lemma can be proven interactively with the previously
+% described tactics and lemmas. For a more comprehensive description of
+% this proof see \cite{Cave:LFMTP13,Cave:MSCS18}.
+% In addition, we have
+% also considered the strong normalization proof for STLC. While the set
+% up is somewhat more complex, the set of previously described tactics suffices.
+
+%%% Local Variables:
+%%% TeX-master: "../main.tex"
+%%% End:

@@ -1,0 +1,42 @@
+\declarejudgment{%
+  $\boxed{\prfchkjudg{\Omega \mid \Delta; \Gamma}{P}{\tau}}$
+}{%
+ Partial proof script $P$ corresponding to theorem $\tau$
+}
+%
+\[
+  \infer{%
+    \prfchkjudg{\Omega \mid \goalctx{}}{\kwbys i\;\kwass x; P}{\tau}
+  }{%
+    \belsynjudg{\cdot \mid \goalctx{}}{i}{\tau^\prime}
+    &
+    \prfchkjudg{\Omega \mid \Delta; \Gamma, x{:}\tau^\prime}{P}{\tau}
+  }
+\]
+\[
+  \infer{%
+    \prfchkjudg{\Omega \mid\goalctx{}}{\kwunboxs i\;\kwass X; P}{\tau}
+  }{%
+    \belsynjudg{\cdot \mid \goalctx{}}{i}{[U]}
+    &
+    \prfchkjudg{\Omega \mid \Delta, X{:}U; \Gamma}{P}{\tau}
+  }
+\]
+%
+\[
+  \infer{%
+    \prfchkjudg{g : \goal{} \mid \goalctx{}}{g}{\tau}
+  }{%
+  }
+  \quad
+  \infer{%
+    \prfchkjudg{\Omega \mid\goalctx{}}{D}{\tau}
+  }{%
+    \dirchkjudg{\Omega \mid\goalctx{}}{D}{\tau}
+  }
+\]
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main.tex"
+%%% End:

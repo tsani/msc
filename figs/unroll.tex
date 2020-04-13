@@ -1,0 +1,52 @@
+  \centering
+\declarejudgmentmulti{%
+  $\boxed{\unrolljudg{\goal{^\prime}}{\goalctx{}}{e}{\tau}}$
+}{
+  \Beluga{} type $\tau$ unrolls to
+  $\tau^\prime$ in the extended meta-context $\Delta^\prime$ and
+  computation context $\Gamma^\prime$.
+}
+\newcommand{\ghole}{%
+  \Delta^\prime ; \Gamma^\prime \mid \tau^\prime
+}
+%
+\newcommand{\conc}[2]{%
+  \unrolljudg{\goalwith {\goalctx{^\prime}} \beta}{\goalctx{}}{#1}{#2}
+}
+\newcommand{\prem}[2]{%
+  \unrolljudg{\goalwith {\goalctx{^\prime}} \beta}{#1}{e}{#2}
+}
+%
+\[
+  \begin{array}{c}
+  % Base case
+  \infer{%
+    \unrolljudg{\goalwith{\goalctx{}} \beta}{\goalctx{}}{g}{\beta}
+  }{
+%    \tau = [U]~\text{or}~\tau = \const{b}
+  }
+  \qquad
+  %
+  % Case for PiBox
+  \infer{%
+    \conc{\tmlams X \bto e}{\Pi X{:}U.\, \tau}
+  }{
+    \prem{\Delta, X{:}U; \Gamma}{\tau}
+  }
+  \\[1em]
+%  \infer{%
+%    \unrolljudg{\goal{}}{\goalctx{}}{g}{[U]}
+%  }{
+%    \tau = [U]~\text{or}~\tau = \const{b}
+%  }
+%  \qquad
+  \infer{%
+    \conc{\tfns x \bto e}{\tau_1 \to \tau_2}
+  }{
+    \prem{\Delta; \Gamma, x{:}\tau_1}{\tau_2}
+  }
+  \end{array}
+\]
+%%% Local Variables:
+%%% TeX-master: "../main.tex"
+%%% End:

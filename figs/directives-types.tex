@@ -1,0 +1,65 @@
+\declarejudgment{%
+  $\boxed{\dirchkjudg{\Omega \mid\goalctx{}}{D}{\tau}}$
+}{%
+  Directive $D$ establishes theorem $\tau$
+}
+%
+\[
+  \begin{array}{c}
+  \infer{%
+    \dirchkjudg{\cdot \mid\goalctx{}}{\kwsolves e}{\tau}
+  }{%
+    \belchkjudg{\cdot \mid \goalctx{}}{e}{\tau}
+  }
+    \\[1em]
+  \infer{%
+    \dirchkjudg{\Omega \mid\goalctx{}}{\kwintross \hypoth{\goalctx{^\prime}}{P}}{\tau}
+  }{%
+    \unrolljudg{\goalwith{\goalctx{^\prime}}{\beta}}{\goalctx{}}{e}{\tau}
+    &
+    \prfchkjudg{\Omega \mid\goalctx{^\prime}}{P}{\beta}
+  }
+\\[1em]
+  \infer{%
+    \dirchkjudg{\Union_k \Omega_k \mid\goalctx{}}{\kwsplits i\;\kwass\vec{\hypoth{\goalctx{_k}}{P_k}}}{\tau}
+  }{%
+    \begin{array}{c}
+    \belsynjudg{\cdot \mid \goalctx{}}{i}{\beta}
+      \quad
+    \scovs (\Delta ; \Gamma \vdash \beta) = \vec{(\_; \theta_k; \Delta_k; \Gamma_k)}
+      \\
+    \text{for all $k$.}\;
+    \prfchkjudg{\Omega_k \mid\goalctx{_k}}{P_k}{\msubst{\theta_k}{\tau}}
+      \end{array}
+  }
+    \\[1em]
+  \infer{%
+    \dirchkjudg{\Union_k \Omega_k \mid\goalctx{}}{%
+      \kwsufficesbys i\; \kwtoshows \vec{(k$\!\,$\mbox{\texttt{>}}~\tau_k \;\kwass P_k)}
+    }
+{\tau_0}
+}{%
+  \begin{array}{c}
+    \belsynjudg{\cdot \mid \goalctx{}}{i}{%
+      \Pi \Delta^\prime.~ \tau^\prime_n \to \ldots \to \tau^\prime_1 \to \tau^\prime_0
+    }
+    \\
+    \Delta \proves ({\mathsf{id}}_\Delta,\theta) : (\Delta,\Delta^\prime)
+    \quad
+    \Delta \proves \msubst{\theta}\tau_0^\prime = \tau_0
+    \\
+    \text{for all $k \in [1,n]$}
+    \quad
+    \Delta \vdash \msubst{\theta}\tau_k^\prime = \tau_k
+    \quad
+    \prfchkjudg{\Omega_k \mid \goalctx{}}{P_k}{\tau_k}
+  \end{array}
+    }
+  \end{array}
+\]
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main.tex"
+%%% End:

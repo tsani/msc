@@ -1,0 +1,139 @@
+\declarejudgment{%
+  $\boxed{\belchkjudg{\Omega \mid \goalctx{}}{e}{\tau}}$
+}{%
+  \Beluga{} term $e$ checks against type $\tau$
+}
+%
+\[
+  \begin{array}{c}
+    % PiBox introduction (mlam)
+  \infer{%
+    \belchkjudg{\Omega \mid \goalctx{}}{\tmlams X \bto e}{\Pi X{:}U.\, \tau}
+  }{%
+    \belchkjudg{\Omega \mid \Delta, X{:}U; \Gamma}{e}{\tau}
+  }
+  \quad
+    % arrow introduction (fn)
+  \infer{%
+    \belchkjudg{\Omega \mid \goalctx{}}{\tfns x \bto e}{\tau_1 \to \tau_2}
+  }{%
+    \belchkjudg{\Omega \mid \Delta; \Gamma, x : \tau_1}{e}{\tau_2}
+  }
+    \\[1em]
+    % switching from checking to synthesis
+\infer{%
+\belchkjudg{\Omega \mid \goalctx{}}{i}{\tau}}
+{\belsynjudg{\Omega \mid \goalctx{}}{i}{\tau}}
+    \quad
+    % subgoal variable
+    \infer{%
+    \belchkjudg{g : (\goalctx{} \proves \tau) \mid \goalctx{}}{g}{\tau}
+    }{}
+\\[1em]
+    % case expression
+  \infer{%
+    \belchkjudg{\Omega, \vec{\Omega_k} \mid \goalctx{}}{%
+    \tcases i\;\tofs \vec{p_k \bto e_k}%
+    }{\tau}
+  }{%
+    \begin{array}{c}
+    \belsynjudg{\Omega \mid \goalctx{}}{i}{\beta}
+      \quad
+    \scovs (\Delta; \Gamma; \beta)
+    = \vec{(p_k, \theta_k, \Delta_k, \Gamma_k)}
+      \\
+      \text{for all $k$. }
+%        \belchkjudg{\goalctx{_k}}{p_k}{\msubst{\theta_k}\beta}
+%      \quad
+    \belchkjudg{\Omega_k \mid \goalctx{_k}}{e_k}{\msubst{\theta_k}{\tau}}
+    \end{array}
+  }
+
+\\[1em]
+    % ordinary let-expression
+ \infer{%
+    \belchkjudg{\Omega_1, \Omega_2 \mid \goalctx{}}{\tlets x = i\;\tins e}{\tau}
+  }{%
+    \belsynjudg{\Omega_1 \mid \goalctx{}}{i}{\tau^\prime}
+    &
+    \belchkjudg{\Omega_2 \mid \Delta; \Gamma, x : \tau^\prime}{e}{\tau}
+  }
+      \\[1em]
+      % let-box expression
+  \infer{%
+    \belchkjudg{\Omega_1, \Omega_2 \mid \goalctx{}}{\tletboxs X = i \;\tins e}{\tau}
+  }{
+    \belsynjudg{\Omega_1 \mid \goalctx{}}{i}{[U]}
+    &
+    \belchkjudg{\Omega_2 \mid \Delta, X{:}U; \Gamma}{e}{\tau}
+  }
+\end{array}
+\]
+
+\declarejudgment{%
+  $\boxed{\belsynjudg{\Omega \mid \goalctx{}}{i}{\tau}}$
+}{%
+  \Beluga{} term $i$ synthesizes type $\tau$
+}
+%
+\[
+  \begin{array}{c}
+    % Look up a program variable in Gamma
+\infer{
+\belsynjudg{\cdot \mid \goalctx{}}{x}{\tau}
+}{\Gamma(x) = \tau}
+\quad
+    % Look up a comp constant in the signature
+    \infer{
+    \belsynjudg{\cdot \mid \goalctx{}}{\const{c}}{\tau}
+    }{%
+    \text{Sig}(\const{c}) = \tau
+    }
+    \quad
+    % Type annotation
+    \infer{
+    \belsynjudg{\Omega \mid \goalctx{}}{(e : \tau)}{\tau}
+    }{
+    \belchkjudg{\Omega \mid \goalctx{}}{e}{\tau}
+    }
+    \\[1em]
+    % PiBox elimination
+  \infer{%
+    \belsynjudg{\Omega \mid \goalctx{}}{i\; C}{\msubst{C/X}{\tau}}
+  }{%
+    \belsynjudg{\Omega \mid \goalctx{}}{i}{\Pi X{:}U.\; \tau}
+    &
+      \Delta \proves C \chk U
+  }
+      \\[1em]
+      % Arrow elimination
+  \infer{
+    \belsynjudg{\Omega_1, \Omega_2 \mid \goalctx{}}{i\; e}{\tau_2}
+  }{%
+    \belsynjudg{\Omega_1 \mid \goalctx{}}{i}{\tau_1 \to \tau_2}
+    &
+    \belchkjudg{\Omega_2 \mid \goalctx{}}{e}{\tau_1}
+  }
+  \end{array}
+\]
+
+\newcommand{\ctx}{~\textsf{ctx}}
+\declarejudgment{%
+  $\boxed{\vdash \Omega \ctx}$
+}{%
+ $\Omega$ is a valid subgoal context
+}
+\[
+  \begin{array}{c}
+\infer{\vdash \cdot \ctx}    {}
+\qquad
+\infer{\vdash (\Omega, g: (\goalctx{} \proves \tau)) \ctx}
+{\vdash \Omega \ctx & \goalctx{} \vdash \tau : \textsf{type}}
+  \end{array}
+\]
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main.tex"
+%%% End:

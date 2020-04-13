@@ -1,0 +1,25 @@
+\declarejudgment{%
+  $\boxed{\itranssjudg{\Omega}{P}{\actionseq}{\Omega^\prime}{P^\prime}}$%
+}{%
+  Sequence of actions $\actionseq$ transforms proof script $P$ with
+  subgoals $\Omega$ into proof script $P^\prime$ with subgoals 
+  $\Omega^\prime$.
+}
+
+
+\[
+  \begin{array}{c}
+  \infer[\irefl]{%
+    \itranssjudg{\Omega}{P}{\cdot}{\Omega}{P}
+  }{}
+\\[0.5em]
+  \infer[\isingle]{%
+    \itranssjudg{\Omega_1, g : \goal{}}{P}{\action, \actionseq}{\Omega_3}{Q}
+  }{%
+    \itrnsjudg{\Delta;\Gamma}{\tau}{\action}{\Omega_2}{P^\prime}
+    &
+    \itranssjudg{\Omega_1, \Omega_2}{\psubst{P^\prime/g}{P}}{\actionseq}{\Omega_3}{Q}
+  }
+    
+  \end{array}
+\]
