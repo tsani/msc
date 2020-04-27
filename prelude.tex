@@ -15,6 +15,10 @@
 \usepackage{hhline}
 \usepackage{underscore}
 
+%% To make clicking on links to figures, tables, etc. take us to the top of
+%% the *figure* instead of to the top of the *caption* !
+\usepackage[all]{hypcap}
+
 \renewcommand{\baselinestretch}{1.5}
 
 %%% TiKZ begin
@@ -153,7 +157,7 @@ decorate, decoration={
 }] (0,0) -- (#1,0);}\ }
 
 % "interactive transition"
-\newcommand{\basicitrans}{\ensuremath\longleadsto{0.85}}
+\newcommand{\basicitrans}{\ensuremath\longleadsto{0.55}}
 \DeclareMathOperator{\itrans}{\mathbin{\basicitrans}}
 \newcommand{\itranss}[1]{\mathbin{\overset{#1}{\basicitrans}\hspace{-1ex}^*}\,}
 \newcommand{\proves}{\vdash}
@@ -162,9 +166,34 @@ decorate, decoration={
 \newcommand{\chk}{\Longleftarrow}
 \newcommand{\syn}{\Longrightarrow}
 \newcommand{\oute}{\rightsquigarrow}
+\renewcommand{\implies}{\supset}
+\newcommand{\true}{\,\mathsf{true}}
+\newcommand{\deriv}{::}
+\newcommand{\pprime}{{\prime\prime}}
+% substitution for derivations
+\newcommand{\dsubst}[1]{[#1]}
+\newenvironment{proofcases}{%
+  \begin{description}%
+    \newcommand{\case}{\item[Case]}%
+  }{%
+  \end{description}%
+}
+\newenvironment{prooftable}{%
+  \newcommand{\colfrac}{.48}%
+  \newcommand{\sz}{\colfrac\textwidth}%
+  \begin{tabular}{p{\sz}p{\sz}}%
+    }{%
+  \end{tabular}%
+}
 
 \newcommand{\interp}[1]{\llbracket #1 \rrbracket}
 \newcommand{\Union}{\bigcup}
+\newcommand{\ass}{{:}}
+\newcommand{\der}{\mathcal} % refer to a derivation
+% shorthand for something deduced by an abstract derivation
+\newcommand{\ded}[2]{%
+  \deduce[#2]{#1}{}
+}
 
 % To make \vec extend over its argument
 \renewcommand{\vec}{\overrightarrow}
@@ -220,7 +249,7 @@ decorate, decoration={
 
 
 % Translation arrow
-\newcommand{\transto}{-\!\!\!-\!\!\!\!\rightharpoonup}
+\newcommand{\transto}{-\!\!\!\!\rightharpoonup}
 % To make a longer arrow, I put a minus before the harpoon and nudge the harpoon
 % to the left so they overlap. Thanks to Marcel for this trick.
 
@@ -376,7 +405,7 @@ decorate, decoration={
 % right.
 % If <judgment> is math, you need to use $...$ yourself.
 \newcommand{\declarejudgment}[2]{%
-  \begin{tabular}{>{\centering\arraybackslash}m{0.35\linewidth}m{0.649\linewidth}}
+  \begin{tabular}{>{\centering\arraybackslash}m{0.35\textwidth}m{0.649\textwidth}}
     #1 & #2
   \end{tabular}%
 }
@@ -436,9 +465,7 @@ decorate, decoration={
 }
 
 \newcommand{\itrnsjudg}[5]{%
-%  #1 \overset{#2}{\itrans} #3 \proves #4
-#1 \vdash #3 : #2 \itrans #4 \vdash #5
-% #1 \vdash #2 : \outa{#3}{#4}
+  #1 \proves #3 : #2 \itrans #4 \vdash #5
 }
 
 % Interactive transition chain judgment
@@ -452,6 +479,8 @@ decorate, decoration={
   %#1 \proves #2 \itranss{#3} #4 \proves #5
 }
 
+% arg 1 should usually be \goalwith{...}{...}
+% this command generates the parens.
 \newcommand{\unrolljudg}[4]{%
   g : #1 \mid #2 \proves #4 \oute #3
 }
