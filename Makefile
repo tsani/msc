@@ -2,7 +2,7 @@
 
 all: main.pdf
 
-%.pdf: %.tex prelude.tex extra/ figs/ code/ sections/
+%.pdf: %.tex prelude.tex figs/ chapters/
 	pdflatex $(basename $<)
 	bibtex $(basename $<)
 	pdflatex $(basename $<)
