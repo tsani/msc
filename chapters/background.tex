@@ -1,0 +1,486 @@
+\chapter{Background}
+\label{chap:background}
+
+Before proceeding with the presentation of my work, I review in this chapter the
+foundations upon which it rests.
+I begin by describing formal systems in general, explaining the proof calculus
+called natural deduction used to represent them.
+As an example, I formulate propositional logic using natural deduction, and
+connect it to the simply-typed lambda calculus (STLC) to explain the
+Curry-Howard correspondence, which is of central importance to the study of the
+logical foundations of programming languages.
+I describe different approaches to mechanizing the metatheory of the STLC by way
+of surveying several modern proof assistants and their support for interactive
+proof development.
+Finally, I explain the Beluga system that \Harpoon{} is directly built on.
+One key takeaway to keep in mind throughout this chapter is that that issues
+concerning contexts, variables, assumptions, and substitutions constitute one of
+the main challenges in mechanizing the metatheory of formal systems.
+
+\section{Formal systems and natural deduction}
+
+A formal system defines a number of \emph{judgments}.
+A judgment is an object of knowledge, and we know that a judgment holds when we
+have a proof for it.
+Then, a formal system also defines the axioms that prove self-evident judgments
+and the inference rules that connect various judgments.
+The set of judgments derivable in a formal system is called its \emph{theory},
+and properties about a formal system are called its
+\emph{metatheory}\footnotemark.
+% Further, we might have a judgment expressing that a proposition $A$ is
+% well-formed, i.e. $A\;\text{prop}$.
+\footnotetext{%
+  Some authors call the metatheory of a system its theory, too, but in this
+  thesis I will use ``metatheory'' consistently.%
+}
+
+To present a formal system, we use a scheme called
+\emph{natural deduction}\todo{cite Gentzen}.
+In this scheme, we present the axioms and inference rules using a horizontal
+line\footnotemark.
+Above this line are the judgments that makes up the premises of the rule, and
+below the line is the judgment that this rule concludes.
+%
+\footnotetext{%
+  One might justify this notation by the fact that a line is itself sometimes
+  called a ``rule''.
+}
+
+For example, we have in propositional logic a judgment
+$A \true$ that expresses the truth of a proposition $A$.
+An inference rule whose conclusion contains a connective is said to
+\emph{introduce} that connective. Here is the rule to introduce a conjunction.
+\[
+  \infer{%
+    A \land B \true
+  }{%
+    A \true
+    &
+    B \true
+  }
+\]
+%
+An inference rule may have no premises, in which case one calls it an
+axiom.
+In propositional logic, the proposition $\top$ is true by an axiom.
+%
+\[
+  \infer{\top\true}{}
+\]
+%
+An important connective in propositional logic is \emph{implication} written
+$A \implies B$.
+This connective internalizes in the logic the notion of a hypothetical
+derivation.
+That is, \emph{assuming} $A$, one derives $B$.
+This was notated by Gentzen in a two-dimensional form.
+%
+\[
+  \infer{%
+    A \implies B \true
+  }{
+    \infer*{%
+      B \true
+    }{
+      \infer[u]{%
+        A \true
+      }{}
+    }
+  }
+\]
+%
+This notation becomes unwieldy in more complex logics, so instead we adopt the
+notion of \emph{context}.
+
+A context $\Gamma$ is a collection of assumptions, and becomes a part of the
+judgment, namely $\Gamma \proves A \true$.
+Consequently, inference rules can manipulate the context.
+To illustrate, let us reformulate the previous rule for introducing an
+implication to use an explicit context.
+%
+\[
+  \infer{%
+    \Gamma \proves A \implies B \true
+  }{
+    \Gamma, u \ass A \true \proves B \true
+  }
+\]
+%
+Reading bottom-up, this rule expresses that to prove $A \implies B \true$
+relative to some assumptions $\Gamma$, one must prove that $B \true$ in an
+extended context, in which one assumes $A \true$.
+% This is precisely the proof method used in mathematics\footnotemark{} to prove
+% an implication.
+% %
+% \footnotetext{%
+%   Specifically in \emph{constructive mathematics}.
+% }
+
+One expects that a context respect a certain number of properties, called
+\emph{structural properties}.
+\begin{description}
+\item[Weakening.]
+  If $\Gamma \proves C \true$,
+  then $\Gamma, u\ass A\true \proves C \true$ --
+  if $C \true$ can be proven with only the assumptions in
+  $\Gamma$, then it remains provable if we add extra assumptions.
+\item[Strengthening.]
+  If $\Gamma, u\ass A\true \proves C\true$ does not use the assumption $u$,
+  then $\Gamma \proves C\true$ --
+  we can remove unused assumptions.
+\item[Contraction.]
+  If $\Gamma, u_1\ass A \true, u_2 \ass A \true \proves C \true$,
+  then $\Gamma, u_1\ass A \true \proves C \true$ --
+  we can remove a duplicate assumption.
+\item[Exchange.]
+  If $\Gamma, u\ass A \true, \Gamma^\prime$,
+  then $\Gamma, \Gamma^\prime, u\ass A \true$ --
+  the order of assumptions does not matter.
+\end{description}
+%
+These properties are the first instances of \emph{metatheoretic} properties we
+have seen.
+That is, they are properties \emph{about} the system rather than derivations
+\emph{in} the system.
+For each system one studies, one must formulate and prove these structural
+properties, as they are essential to further developing the metatheory of the
+system, as we shall soon see.
+Each structural property is proven by induction on the given derivation.
+I will omit the proofs of these, but rest assured that I will present some
+proofs in due time.
+
+So far, the rules we have seen introduce a connective, so they are
+called \emph{introduction rules}.
+These rules explain the \emph{meaning} of the logical connective that is
+introduced.
+What does it \emph{mean} to know $A \land B \true$?
+It means that we know $A \true$ and that we know $B \true$.
+Similarly, what does it \emph{mean} to know $A \implies B \true$?
+It means that, assuming $A \true$, we know $B \true$.
+These interpretations of the connectives suggest also what one could extract
+from them. Rules to do just that are called
+\emph{elimination rules}.
+
+For example, since the judgment $A \land B \true$ incorporates that $A \true$
+and that $B \true$, then these two judgments ought to be derivable from
+$A \land B \true$. Formally, we have the following two conjunction elimination
+rules.
+%
+\[
+  \infer{%
+    \Gamma \proves A \true%
+  }{%
+    \Gamma \proves A \land B \true%
+  }%
+  \quad
+  \infer{%
+    \Gamma \proves B \true%
+  }{%
+    \Gamma \proves A \land B \true%
+  }
+\]
+%
+As for implications, since the interpretation is that we know $B \true$
+\emph{assuming} $A \true$, we must demand that $A \true$ to eliminate an
+implication.
+%
+\[
+  \infer{%
+    \Gamma \proves B \true
+  }{%
+    \Gamma \proves A \implies B \true
+    &
+    \Gamma \proves A \true
+  }
+\]
+
+Setting aside the philosophy of the meanings of the connectives that intuitively
+justifies these elimination rules, one can more formally study the connection
+between introduction rules and their corresponding elimination rules.
+In designing an elimination rule, one must take great care as to not make the
+rule \emph{too strong}, i.e. capable of deriving information that was not
+present in the premises of the introduction rule.
+Conversely, the elimination rule must not be so weak as to be incapable of
+reconstructing the information necessary to reintroduce the connective.
+These two properties are called the \emph{local soundness} and
+\emph{local completeness} of the pair of rules.
+
+Concretely, to see whether local soundness holds, one forms a proof containing a
+\emph{detour} and sees whether this detour can be removed.
+For a conjuction, such a detour would be to eliminate a conjunction that has
+just been introduced.
+%
+\[
+  \infer{%
+    \Gamma \proves A \true
+  }{%
+    \infer{%
+      \Gamma \proves A \land B \true
+    }{%
+      \ded{\Gamma \proves A \true}{%
+        \der{D}_1
+      }
+      &
+      \ded{\Gamma \proves B \true}{%
+        \der{D}_2
+      }
+    }
+  }
+\]
+%
+Clearly, such a detour can be eliminated by using the derivation $\der{D}_1$
+that was already present when forming the conjunction!
+A similar analysis applies when considering the second conjunction elimination
+rule.
+Next, to see that local completeness holds, we begin by assuming a derivation
+$\der{D}$ proves $\Gamma \proves A \land B \true$ and we see that we can extract
+from this all the information necessary to use the introduction rule.
+%
+\[
+  \infer{%
+    \Gamma \proves A \land B \true
+  }{
+    \infer{
+      \Gamma \proves A \true
+    }{
+      \ded{\Gamma \proves A \land B \true}{\der{D}}
+    }
+    &
+    \infer{
+      \Gamma \proves B \true
+    }{
+      \ded{\Gamma \proves A \land B \true}{\der{D}}
+    }
+  }
+\]
+
+The analysis for conjunctions was straightforward, but we will see that for
+implications it is more subtle.
+I will begin this time with local completeness, as it is the simpler property to
+show in this case.
+To reiterate, we assume a derivation $\der{D}$ proves
+$\Gamma \proves A \implies B \true$.
+The game plan is to eliminate and reintroduce the implication:
+the trick is to use the assumption $u \ass A \true$ obtained by the introduction
+rule in order to satisfy the elimination rule.
+%
+\[
+  \infer{%
+    \Gamma \proves A \implies B \true
+  }{%
+    \infer{%
+      \Gamma, u \ass A \true \proves B \true
+    }{
+      \ded{%
+        \Gamma, u \ass A \true \proves A \implies B \true
+      }{\der{D}}
+      &
+      \infer{%
+        \Gamma, u \ass A \true \proves A \true
+      }{}
+    }
+  }
+\]
+
+Next, to show local soundness, we analyze a derivation that eliminates an
+implication that has just been introduced.
+%
+\[
+  \infer{%
+    \Gamma \proves B \true
+  }{
+    \infer{%
+      \Gamma \proves A \implies B \true
+    }{
+      \ded{%
+        \Gamma, u \ass A \true \proves B \true
+      }{\der{D}_1}
+    }
+    &
+    \ded{\Gamma \proves A \true}{\der{D}_2}
+  }
+\]
+%
+To obtain a derivation without this detour, the idea is to take the derivation
+$\der{D}_2$ which proves $A \true$ to fill in the assumption that $\der{D}_1$
+depends on.
+To that end, we must formulate a \emph{substitution property}.
+A need for such a property arises whenever we seek to replace a variable, which
+is a placeholder, with some object for which the variable might stand.
+In this case, the variable $u$ stands for a derivation, so we formulate the
+subtitution property as follows.
+%
+\begin{thm}
+  If $\der{D}_1 \deriv \Gamma, u \ass A \true \proves C \true$
+  and $\der{D}_2 \deriv \Gamma \proves A \true$,
+  then $\dsubst{\der{D}_2 / u} \der{D}_1 \deriv \Gamma \proves C \true$.
+\end{thm}
+%
+\begin{proof}
+  By induction on $\der{D}_1$. I will show representative cases only.
+  \begin{proofcases}
+    \case
+    $\der{D}_1 =
+    \infer{%
+      \Gamma, u\ass A\true \proves C_1 \implies C_2 \true
+    }{%
+      \ded{%
+        \Gamma, u\ass A\true, u^\prime\ass C_1 \true \proves C_2 \true
+      }{\der{D}^\prime}
+    }$
+
+    \begin{prooftable}
+      $\der D^\pprime \deriv
+      \Gamma, u^\prime\ass C_1 \true, u\ass A\true \proves C_2 \true$
+      & by exchange on $\der{D}^\prime$ %
+      \\
+      %
+      $\der D_2^\prime \deriv
+      \Gamma, u^\prime\ass C_1\true \proves A\true$
+      & by weakening on $\der{D}_2$ %
+      \\
+      %
+      $\der F \deriv
+      \Gamma, u^\prime\ass C_1 \true \proves C_2 \true$
+      & by IH on $\der D^\pprime$ and $\der D_2^\prime$
+      \\
+      %
+      $\Gamma \proves C_1 \implies C_2 \true$
+      & by implication intro. on $\der F$
+    \end{prooftable}
+
+    Observe that we appeal to the IH not on the immediate subderivations of
+    $\der D_1$, but rather on the subderivations \emph{after} appealing to the
+    exchange and weakening lemmas.
+    Technically, this must be justified by separately reasoning
+    that these lemmas do not increase the size of the derivations.
+
+    \case
+    $\der D_1 =
+    \infer{%
+      \Gamma, u\ass A\true \proves A\true%
+    }{}$
+
+    This case is immediate from the assumption
+    $\der D_2 \deriv \Gamma \proves A \true$.
+
+    \case
+    $\der D_1 =
+    \infer{%
+      \Gamma, u^\prime\ass B\true, u\ass A\true \proves B\true
+    }{}$
+
+    Observe that the the substitution is targeting the assumption $u$, but this
+    assumption is unused in this derivation.
+    Therefore we strengthen this derivation to obtain
+    $\der D_1^\prime \deriv \Gamma, u^\prime\ass B\true \proves B\true$.
+    %
+    \qedhere
+  \end{proofcases}
+\end{proof}
+
+Equipped with this substitution property, we can return to the task of
+demonstrating local soundness of implications.
+Recall the derivation we wish to simplify.
+%
+\[
+  \infer{%
+    \Gamma \proves B \true
+  }{
+    \infer{%
+      \Gamma \proves A \implies B \true
+    }{
+      \ded{%
+        \Gamma, u \ass A \true \proves B \true
+      }{\der{D}_1}
+    }
+    &
+    \ded{\Gamma \proves A \true}{\der{D}_2}
+  }
+\]
+%
+By the substitution property,
+we have that $\dsubst{\der D_2 / u}\der D_1 \deriv \Gamma \proves B \true$ as
+required.
+
+In light of local soundness, which eliminates an immediate detour in a proof, a
+natural question to consider is whether it is possible to eliminate \emph{all}
+detours from a proof.
+This is a far more subtle question that will be answered more formally in the
+following section, so I will speak here only broadly about the idea.
+First, one must characterize what a ``detour-free'' derivation is.
+One says that such a derivation is in \emph{normal form}.
+Then, one must show that for any derivation that proves a given judgment,
+there is a derivation in normal form that establishes the same judgment.
+More formally, we can state the following normalization theorem.
+\begin{thm}
+  For any $\der D$, if $\der D \deriv \Gamma \proves A \true$, then there exists
+  $\der D^\prime$ such that $\der D^\prime$ is in normal form and
+  $\der D^\prime \deriv \Gamma \proves A \true$.
+\end{thm}
+%
+\inlinetodo{%
+  Read/cite Prawitz for the direct proof.
+  Cite Pfenning for the modern proof via sequent calculus.%
+}%
+%
+Gentzen proved normalization for propositional logic by defining a second formal
+system called the \emph{sequent calculus}.
+He first showed that any natural deduction proof could be translated to a
+sequent calculus proof.
+Then he showed that a particular rule of the sequent calculus, called
+\emph{cut}, is in fact admissible. That is, it can be derived from the other
+rules.
+Using cut-admissibility, it is possible to translate any sequent calculus proof
+into a cut-free form.
+Finally, he showed that cut-free sequent calculus proofs are in correspondence
+with natural deduction proofs in normal form.
+For a modern account of this proof strategy, see \cite{pfenning-cut}.
+It was later discovered that normalization could be established without
+considering the sequent calculus, although this approach is more complicated
+(see \cite{prawitz-normalization}).
+Finally, one can establish normalization using a technique called reducibility
+first developed by Tait \cite{tait-reducibility}. This is the approach that I
+will present in more detail in Sec.~\ref{sec:lambda-calculus}.
+
+To conclude this section on the fundamentals of formal systems, I want to draw
+attention to our reasoning about contexts.
+To recap, in proving the sustitution property used to establish local soundness
+for implications, we appeal to the structural properties of the context.
+Further, we argue that these properties are size-preserving in order to justify
+the well-foundedness of our appeal to the induction hypothesis.
+These concerns arise again when we consider mechanizations of the lambda
+calculus in Sec.~\ref{sec:mechanizations}: although it is easy for us to see
+that our reasoning is above board, additional formalization is required to
+convince a proof assistant that our reasoning is correct.
+
+\section{Lambda calculus}
+\label{sec:lambda-calculus}
+
+
+
+\inlinetodo{I AM HERE}
+
+\inlinetodo{%
+  discuss Curry-Howard and show that the type formers for STLC correspond with
+  the connectives of propositional logic
+
+  discuss operational semantics
+
+  discuss the metatheory of the lambda calculus: substitution lemma, type
+  preservation, progress, normalization
+}
+
+\section{Mechanizing the lambda calculus}
+
+\inlinetodo{%
+  Discuss different approaches to encoding the lambda calculus:
+  named encoding, nameless encoding, nominal encoding, HOAS (LF) encoding.
+}
+
+\section{Beluga}
+
+%
+%%% Local Variables:
+%%% TeX-master: "../main.tex"
+%%% End:
