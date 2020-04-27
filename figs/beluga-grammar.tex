@@ -1,0 +1,36 @@
+\[
+  \begin{grammar}
+    \category{Base Types}{\beta}{%
+       \const{b}~\vec{C} \mid [U]
+    }%
+    \category{Types}{\tau}{%
+      \beta \mid \Pi X{:}U.\,\tau \mid \tau_1 \to \tau_2
+    }%
+    \category{Checkable Terms}{e}{%
+      \bar g \mid i \mid [C]
+      \mid \tcases i\;\tofs \vec{p_k \bto e_k}
+    }%
+    \continue{%
+      \tmlams X \bto e \mid \tfns x \bto e
+    }%
+    \continue{%
+      \tlets {x = i}\;\tins e \mid \tletboxs {X = i}\;\tins e
+    }%
+    \category{Synthesizable Terms}{i}{%
+      x \mid \const{c} \mid i~C \mid i~e \mid (e : \tau)
+    }
+    \category{Patterns}{p}{[C] \mid \const{c}~\vec{p} \mid x}
+    \category{Context}{\Gamma}{%
+      \cdot \mid \Gamma, x{:}\tau
+    }
+    \category{Subgoal context}{\Omega}{%
+      \cdot
+      \mid \Omega,\; g{:}\goal{}
+      \mid \Omega,\;\bar g{:}\goal{}
+    }
+  \end{grammar}
+\]
+%
+%%% Local Variables:
+%%% TeX-master: "../main.tex"
+%%% End:

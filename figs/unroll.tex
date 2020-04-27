@@ -1,9 +1,13 @@
   \centering
 \declarejudgmentmulti{%
-  $\boxed{\unrolljudg{\goal{^\prime}}{\goalctx{}}{e}{\tau}}$
+  $\boxed{%
+    \unrolljudg{%
+      \goalwith{\goalctx{^\prime}}{\beta}%
+    }{\goalctx{}}{e}{\tau}%
+  }$
 }{
   \Beluga{} type $\tau$ unrolls to
-  $\tau^\prime$ in the extended meta-context $\Delta^\prime$ and
+  $\beta$ in the extended meta-context $\Delta^\prime$ and
   computation context $\Gamma^\prime$.
 }
 \newcommand{\ghole}{%
@@ -25,25 +29,21 @@
   }{
 %    \tau = [U]~\text{or}~\tau = \const{b}
   }
-  \qquad
+    \\[1em]
+  %
+  % Case for Arrow
+  \infer{%
+    \conc{\tfns x \bto e}{\tau_1 \to \tau_2}
+  }{
+    \prem{\Delta; \Gamma, x{:}\tau_1}{\tau_2}
+  }
+  \\[1em]
   %
   % Case for PiBox
   \infer{%
     \conc{\tmlams X \bto e}{\Pi X{:}U.\, \tau}
   }{
     \prem{\Delta, X{:}U; \Gamma}{\tau}
-  }
-  \\[1em]
-%  \infer{%
-%    \unrolljudg{\goal{}}{\goalctx{}}{g}{[U]}
-%  }{
-%    \tau = [U]~\text{or}~\tau = \const{b}
-%  }
-%  \qquad
-  \infer{%
-    \conc{\tfns x \bto e}{\tau_1 \to \tau_2}
-  }{
-    \prem{\Delta; \Gamma, x{:}\tau_1}{\tau_2}
   }
   \end{array}
 \]

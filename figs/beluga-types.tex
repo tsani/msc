@@ -27,7 +27,9 @@
     \quad
     % subgoal variable
     \infer{%
-    \belchkjudg{g : (\goalctx{} \proves \tau) \mid \goalctx{}}{g}{\tau}
+      \belchkjudg{%
+        \bar g : (\goalctx{} \proves \tau) \mid \goalctx{}
+      }{\bar g}{\tau}
     }{}
 \\[1em]
     % case expression
