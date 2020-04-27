@@ -1,71 +1,110 @@
 \chapter{Introduction}
 \label{chap:introduction}
 
-Mechanizing metatheory about formal systems such as programming languages and
-logics plays an important role in establishing trust in formal developments. One
-key question in this endeavour is how to represent variables, (simultaneous)
-substitution, assumptions, derivations that depend on assumptions, and the proof
-state, as our choices may impact how easy or how cumbersome it will be to
-develop proofs about formal systems.
+Developing the metatheory of formal systems such as logics and programming
+languages is central to establishing trust in those systems.
+Such trust is essential since quite sophisticated programming languages, having
+a multitude of features, are used to create the vast bodies of software that
+surround us in the modern world.
+However, as a system of study becomes more complex, so does its metatheory.
+Developing a proof on paper, although an excellent strategy for gaining an
+intuition for the proof's correctness, does not provide a bulletproof assurance
+of its correctness.
+Instead, one can seek a higher standard of correctness by \emph{mechanizing} the
+metatheory.
+That is, one can verify a proof using software called a proof assistant.
 
-\Beluga~\cite{Pientka:IJCAR10,Pientka:CADE15} is a proof environment which
+Alas, using a proof assistant is not as simple as one might hope.
+One must first \emph{encode} the system of study in the assistant.
+Next, one must formulate the statements of the theorems and their proofs in a
+way that the assistant can automatically verify.
+How one goes about resolving both of these concerns depends greatly on the
+chosen proof assistant.
+
+Proof assistants come in many shapes and flavours, as building such an
+assistant requires that one make some extremely impactful choices.
+What underlying theory will it use?
+How will a user interact with it?
+What sorts of proofs is it specialized for, if any?
+In assistants specialized for mechanizing metatheory, a key question is:
+how to represent variables, (simultaneous) substitutions, assumptions,
+derivations that depend on assumptions, and the proof state?
+These decisions greatly influence how easy (or how cumbersome) it might be to
+encode various formal systems and to reason about them.
+
+% That is, these assistants exploit a beautiful phenomenon that links proofs with
+% programs, called the Curry-Howard correspondence.
+%
+% This correspondence first observes that the connectives from logic, such as
+% implications and quantifiers, can be reinterpreted as type formers in an
+% appropriate functional programming language.
+% For example, a logical proposition ``$A$ implies $B$'', written formally as
+% $A \implies B$, can be reinterpreted as the type $A \to B$, i.e. the type of
+% functions from type $A$ to type $B$.
+% This is called the \emph{propositions-as-types} principle.
+% Second, the correspondence observes that the \emph{proof}
+% of a proposition $A$ can be reinterpreted as a \emph{program} belonging to the
+% type $A$.
+% This aspect of the correspondence is called the \emph{proofs-as-programs}
+% principle.
+% Typechecking a program then corresponds to checking that the proof that it
+% represents indeed does prove the proposition that one claims it to prove.
+
+% This correspondence explains precisely why a proof assistant can take the form
+% of a programming language at all:
+% programming and proving are one and the same.
+% However, a property one cares greatly about in a logic is its
+% \emph{consistency}.
+% That is, it ought to be impossible to derive a falsehood.
+
+\Beluga~\cite{Pientka:IJCAR10,Pientka:CADE15} is a proof assistant which
 provides sophisticated infrastructure for implementing formal systems based on
 the logical framework LF~\cite{Harper93jacm}.
 This allows programmers to uniformly specify syntax, inference rules, and
 derivation trees using higher-order abstract syntax (HOAS) and relieves users
-from having to build custom-support to manage variable binding,
+from having to build custom support for managing variable binding,
 renaming, and substitution.
-%
+
 Following the Curry-Howard correspondence, \Beluga{} users develop inductive
 metatheoretic proofs about formal systems by writing a total recursive
-dependently-typed program by pattern matching on derivation trees. Proof
-checking then amounts to type checking the user's program.
+dependently-typed program by pattern matching on derivation trees.
+Given that the proof is represented as a program, proof checking amounts to
+typechecking the program.
 \Beluga{} hence follows in the foot steps of proof checkers such as Automath
-\cite{Nederpelt:94}, Agda \cite{Norell:phd07}, and specifically Twelf \cite{Pfenning99cade}.
+\cite{Nederpelt:94}, Agda \cite{Norell:phd07}, and specifically Twelf
+\cite{Pfenning99cade}.
 
-%
-%While developing proofs in a proof assistant is hard, writing a dependently typed program that corresponds to the proof is even harder.
-While writing a proof as a dependently typed program is a beautiful idea, it also
-can be challenging and cumbersome. This limits the wide spread use of
-dependently-typed programming languages for mechanizing proofs in
-general. Hence, many proof assistants in this domain provide some form
-of interaction: for example, Agda \cite{Norell:phd07} supports leaving holes
-(questionmarks) and writing partial programs which can later be
-refined using a fixed limited set of interactions. However a clear
-specification and theoretical foundation of how these interactions
-transform programs is largely missing. In \Coq{}
-\cite{bertot/casteran:2004} users interactively develop a proof using
-\emph{tactics}. Behind the scenes, a sequence of tactic applications
-is elaborated into a dependently-typed
-program. Ideally, applying successfully a tactic to a proof state should
-only result in a new valid, consistent proof state, but this isn't always the case:
-user-defined tactics for \Coq{} constructed in the Ltac language
-\cite{Delahaye:LPAR00} are mostly unconstrained; it is \Coq's typechecker
-that verifies post hoc that the program generated by the tactics is
-valid. A common additional caveat of tactic languages
-is that often, the resulting proof script is brittle and
-unreadable.
-% they are low-level (for example, we might refer to an assumption by its position in the list of assumptions),
-% From a user's perspective programs become the by-product
-% of an interactive proof session.
+While writing a proof as a dependently typed program is a beautiful idea, it
+can be quite challenging and cumbersome.\todo{why?}
+This limits the widespread use of dependently-typed programming languages for
+mechanizing proofs in general.
+Hence, many proof assistants in this domain provide some form
+of interactivity: for example, Agda \cite{Norell:phd07} supports leaving holes
+(question marks) and writing partial programs which can later be refined using a
+fixed limited set of interactions.
+However a clear specification and theoretical foundation of how these
+interactions transform programs is largely missing.
+In \Coq{} \cite{bertot/casteran:2004} users interactively develop a proof using
+\emph{tactics}.
+Behind the scenes, a sequence of tactic applications is elaborated into a
+dependently-typed program.
+Ideally, applying successfully a tactic to a proof state should only result in a
+new valid, consistent proof state, but this isn't always the case: user-defined
+tactics for \Coq{} constructed in the Ltac language \cite{Delahaye:LPAR00} are
+mostly unconstrained; it is \Coq's typechecker that verifies post hoc that the
+program generated by the tactics is valid.
+A common additional caveat of tactic languages is that often, the resulting
+proof script is brittle and unreadable.
 
-
-% How can we support interactive development of proofs and at the same time keep a tight connection between the proof development on the one hand the  program development on the other? --
-%As a user, we clearly want to build at least part of the proof (program) interactively.
-
-
-
-% our goal: design a a tactic-driven interactive theorem proving interface that retains the subgoal structure and is hence less brittle than existing approaches.
-
-In this paper, we present the design and implementation of \Harpoon, an
+In this thesis, I present the design and implementation of \Harpoon, an
 interactive proof environment built on top of \Beluga, where programmers develop
-proofs by a fixed set of tactics.
-The user invokes a tactic in the context of a subgoal in order to transform,
-split, or solve it.
-Our fixed set of tactics is largely inspired by similar systems such as Twelf
-\cite{Schurmann98cade} or Abella \cite{Gacek:IJCAR08} supporting introduction of
-assumptions, case-analysis, and inductive reasoning, as well as both forward and
-backward reasoning styles.
+proofs using a fixed set of tactics.
+The user invokes an action on a subgoal in order to eliminate it, possibly
+introducing new subgoals in doing so.
+Our fixed set of tactics is largely inspired by similar systems such as
+Abella \cite{Gacek:IJCAR08} and Coq, supporting introduction of assumptions,
+case-analysis, and inductive reasoning, as well as both forward and backward
+reasoning styles.
 As \Harpoon{} is built on top of \Beluga{}, its tactics can also refer to a
 Beluga{} programs to provide an explicit proof witness to justify a proof step.
 The ability to seamlessly mix programming with command-driven interactive
@@ -75,38 +114,13 @@ Finally, successful tactic application is guaranteed to transform a valid proof
 state into another valid proof state.
 %
 \Harpoon's command-driven front-end generates automatically as a result a proof
-script that retains the subgoal structure. We think of a proof script as an
-intermediate proof representation language to facilitate translation to
-other formats, such as into (executable) \Beluga{} programs as shown in this paper or
-perhaps eventually into a human-readable proof format.
-Our specific contributions are the following:
+script that reflects the subgoal structure.
+I think of a proof script as an intermediate proof representation language to
+facilitate translation to other formats, such as into (executable) \Beluga{}
+programs as shown in this thesis or perhaps eventually into a human-readable
+proof format. My specific contributions are the following:
 
-%In this paper, we show the elaboration of structured proof scripts into well-typed \Beluga{} programs.
-% Hence, our whole proof development pipeline in \Harpoon{} is fully specified and at every given point we can type check our intermediate result.
-%
-% %
-% \Harpoon{} is built as an extension to \Beluga{}, and we allow mixing proof
-% scripts and programs within a single file [but not witihin a program?], so proofs may depend on programs and vice versa. This enables users to select the approach  that best suits the theorem they are proving.
-%
-%
-% We demonstrate in section~\ref{sec:example} the use of \Harpoon{} to prove a
-% simple theorem, and explain how the interactive actions used are elaborated into
-% the final proof script.
-%
-% %
-% In section~\ref{sec:syntax}, we develop the metatheory of interactive \Harpoon{}
-% sessions and of \Harpoon{} proof scripts. Notably, we prove that an interactive
-% session always produces well-typed proof scripts.
-% %
-% Finally, we develop in section~\ref{sec:translation} a translation from
-% \Harpoon{} proofs to \Beluga{} programs and we prove the translation to be
-% type-preserving. This guarantees that proof scripts indeed are
-% \emph{proofs}. Together with the soundness result from section~\ref{sec:syntax},
-% this allows us to view the interactive environment as a structured editor for
-% \Beluga{} programs that is guaranteed to produce only well-typed programs.
-%
-
-\begin{figure}
+\begin{figure}[t]
   \centering
   \input{figs/harpoon-diagram}
   \caption{\Harpoon{} Design Overview}
@@ -115,89 +129,56 @@ Our specific contributions are the following:
 
 \begin{itemize}
 \item
-  We present the design and implementation of \Harpoon, an
+  I present the design and implementation of \Harpoon, an
   interactive command-driven front-end of \Beluga{} for mechanizing
   meta-theoretic proofs.
   Starting from a user-specified theory (including both its syntax and its
-  judgments), users interactively develop meta-theoretic proofs using tactics.
-  In tutorial style, we develop a short proof in Sec.~\ref{sec:example} by way
-  of giving a whirlwind tour of the main supported tactics in \Harpoon.
-
-  % and a meta-theoretic statement one wants to prove, users develop the proof
-  % interactively using proof actions (see
-  % Fig.~\ref{fig:harpoon}).
-  % These actions are high-level and focus on
-  % how we develop meta-theoretic proofs and include case analysis,
-  % applying a lemma or an induction hypothesis, or providing a concrete
-  % proof witness for a subgoal. Notably, uses of substitution and weakening
-  % properties are inherited from LF and are used silently. The
-  % result will be a structured proof script which subsequently can be
-  % translated into a \Beluga{} program. While it is in principle
-  % possible to directly generate a \Beluga{} program, proof scripts
-  % help to characterize more clearly where open subgoals can occur
-  % and what conditions they must satisfy. They also allows us to
-  % naturally combine forward and backward reasoning.
+  judgments), users interactively develop metatheoretic proofs using tactics.
+  In tutorial style, I use \Harpoon{} to interactively develop a proof in
+  Chap.~\ref{chap:example} by way of giving a whirlwind tour of the main
+  supported tactics in \Harpoon.
 
 \item
-  We define in Sec.~\ref{sec:harpoon} a proof script language that reflects
-  the proof structure laid out by the user and clearly separates forwards and
-  backwards reasoning.
-  We describe formally the relation between interactive tactics and proof
-  scripts in Sec.~\ref{sec:harpoon-actions} and prove soundness of interactive
-  proof construction.
-  We give a type-preserving translation from proof scripts to \Beluga{} programs
-  in Sec.~\ref{sec:translation}.
-  This guarantees that proof scripts actually represent proofs and allows proof
-  scripts to be not only typechecked, but also executed.
+  In Chap.~\ref{chap:theory}, I describe a logical foundation for interactive
+  proof development. To that end, I explain first in Sec.~\ref{sec:harpoon} a
+  proof script language that reflects the proof structure laid out by the
+  user. This language clearly separates forwards and backwards reasoning.
+  Then, I explain formally the interactive tactics and their connection to proof
+  scripts. I prove soundness of interactive proof construction, and give a
+  translation from proof scripts into \Beluga{} programs, showing that this
+  translation is type-preserving.
+  This justifies that proof scripts indeed represent proofs and form a valid way
+  to develop metatheory, and also allows proof scripts to not only be
+  typechecked, but also executed as programs.
   Fig.~\ref{fig:harpoon} summarizes the connection among tactics, proof
   scripts, and \Beluga{} programs.
-  %%% I think we should avoid *arguing* why we make the choices we make in this
-  %%% list, and instead concentrate on presenting the contributions.
-  % Although it is in principle possible to directly generate a \Beluga{} program
-  % as a result of an interactive session, the proof script language helps
-  % characterize what positions subgoals may appear in and what conditions they
-  % must satisfy.
-  % Further, we expect it to be helpful in a later translation to human-readable
-  % proofs.
 
 \item
-  We characterize and reason about incomplete programs using contextual
-  types.
-  A variable of such a type represents a hole in the proof, i.e. a statement to
-  prove together with a set of available assumptions.
-  Our formalism of incomplete proofs is such that holes are independent of each
+  I characterize and reason about incomplete programs using
+  \emph{contextual types}.
+  A variable of such a type, which I call a \emph{subgoal variable}, represents a
+  hole in the proof, i.e. a statement to prove together with a set of available
+  assumptions.
+  My formalism of incomplete proofs is such that holes are independent of each
   other and may be solved in any order.
-  We show that incremental proof development amounts of successively applying
-  contextual substitutions to eliminate holes, while possibly introducing new
-  ones.
-  % \Harpoon{} guarantees that a successful action application
-  % transforms a valid proof state into another valid proof state.
-  % This crucially relies on characterizing and reasoning about holes in
-  % incomplete proofs and programs.
-  % We exploit the power of contextual types to describe holes in incomplete
-  % proofs together with the context(s) in which the hole occurs.
-  % Most notably, the contextual subgoal type cannot refer to other open subgoals
-  % (or holes).
-  % This allows us to reason modularly about incremental proof development via
-  % actions and at the same time constrains the actions one can
-  % take.
-  % Interactively developing a proof amounts to successively applying contextual
-  % substitutions to eliminate holes.
+  I show that incremental proof development amounts of successively applying
+  contextual substitutions to eliminate a subgoal variable, while possibly
+  introducing new ones.
 
 \item
-  \Harpoon{} is implemented as part of \Beluga{} and is available
-  at: \meh{???}.
-  We have used it for a range of representive examples from the
+  \Harpoon{} is implemented as part of \Beluga{} and is documented together with
+  \Beluga{} at \url{https://beluga-lang.readthedocs.io/}.
+  We have used \Harpoon{} for a range of representive examples from the
   \Beluga{} library, in particular type safety proofs for
   MiniML, normalization proofs for the simply-typed lambda calculus
   \cite{Cave:MSCS18},
   % a higher-order solution to POPLMark \cite{Pientka:TPHOLs07},
   benchmarks for reasoning about binders
-  \cite{Felty:MSCS17,Felty:orbi-survey}, and the recent POPLMark Reloaded
-  challenge \cite{POPLMarkReloaded:19}.
+  \cite{Felty:MSCS17,Felty:orbi-survey},
+  and the recent POPLMark Reloaded challenge \cite{POPLMarkReloaded:19}.
   These examples cover a wide range of aspects that arise in the
   proof development such as complex reasoning with and about contexts,
-  context schemas, and substitutions.
+  context schemas, substitutions, and variables.
 \end{itemize}
 
 % While we design an interactive proof development engine for \Beluga, we believe there are some general lessons one can draw from our design:
@@ -207,6 +188,6 @@ Our specific contributions are the following:
 % A proof script which is structured representation of the proof attempt allows programmers to seamlessly switch between programming and proving; as proof scripts are more verbose, we can state clearly what it means to refine a proof script; as the proof script is generated automatically and not written by the programmer, it does not matter that it is verbose; verbosity in fact helps to generate programs from proof scripts; we also see proof scripts as a good intermediate representation to generate human-readable proofs.
 
 %%% Local Variables:
-%%% mode: latex
+
 %%% TeX-master: "../main.tex"
 %%% End:
