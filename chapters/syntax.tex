@@ -1,10 +1,8 @@
-\renewcommand*{\arraystretch}{1}
-
 \chapter{%
   A Logical Foundation for Interactive Theorem Proving%
 }
 \chaptermark{Logical Foundation}
-\label{sec:syntax}
+\label{chap:theory}
 
 In this section we give a logical foundation for interactive
 command-driven theorem proving in \Beluga{}. In particular, we describe interactive
@@ -26,13 +24,13 @@ compiled to \Beluga{} programs.
 % \Beluga{} programs.
 
 \section{%
-  Background:  \Beluga's Programming Language%
+  Background:  proofs as programs%
 }
 \label{sec:beluga}
 We begin by describing \Beluga's programming language where we can
-describe (inductive) proofs as total recursive programs. From a
-logical perspective, \Beluga{} programs provide witnesses for
-first-order inductive proofs over a specific index domain.
+describe (inductive) proofs as total recursive programs.
+From a logical perspective, a \Beluga{} program witnesses a theorem in a
+first-order logic equipped with induction over a specific index domain.
 In general, this index domain can be natural numbers, strings, or lists
 \cite{ChH03Pha,Xi:POPL03}, although in \Beluga{}, this index domain
 consists of first-class contexts and (contextual) LF objects (see
@@ -96,90 +94,54 @@ compatible with our current presentation. %
 \end{description}
 
 
-Below we describe the core fragment of \Beluga{}. We do so in a bidirectional
-way, separating terms into those that we check against a given type and those
-for which we synthesize a type.
-To keep the presentation simple, we model
-(co)inductive and stratified types as constants.
-% Our implementation does support these features, but we
-% do not yet consider them in our metatheory.
-Types include simple functions (implications),
-written as $\tau_1 \to \tau_2$;
-dependent functions (universal quantification over elements in
-the index domain), written as $\Pi X{:}U.\,\tau$;
-boxed types, written as $[U]$, where $U$ is a predicate defined in the
-index domain; and constants $\const{b}~\vec{C}$ used to model (co)inductive
-and stratified types. Here $\const{b}$ stands for an indexed type
-family.
-
-\[
-  \begin{grammar}
-    \category{Base Types }{\beta}{%
-       \const{b}~\vec{C} \mid [U]
-    }%
-    \category{Types }{\tau}{%
-      \beta \mid \Pi X{:}U.\,\tau \mid \tau_1 \to \tau_2
-    }%
-    \category{Checkable Terms}{e}{%
-      g \mid i \mid [C]
-      \mid \tmlams X \bto e \mid \tfns x \bto e
-      \mid \tcases i\;\tofs \vec{p_k \bto e_k}
-    }%
-    \continue{%
-      \tlets {x = i}\;\tins e \mid \tletboxs {X = i}\;\tins e
-    }%
-    \category{Synthesizable Terms}{i}{%
-      x \mid \const{c} \mid i~C \mid i~e \mid (e : \tau)
-    }
-    \category{Patterns}{p}{[C] \mid \const{c}~\vec{p} \mid x}
-    \category{Context}{\Gamma}{%
-      \cdot \mid \Gamma, x{:}\tau
-    }
-    \category{Subgoal context}{\Omega}{%
-      \cdot \mid \Omega, g{:}(\goalctx{} \proves \tau)
-    }
-  \end{grammar}
-\]
-
-
+Below we describe the core fragment of \Beluga{}.
+Terms are separated into those that we check against a given type and those for
+which we synthesize a type.
+To keep the presentation simple, we model (co)inductive and stratified types as
+constants.
+Types include simple functions $\tau_1 \to \tau_2$,
+dependent functions $\Pi X{:}U.\,\tau$,
+boxed types $[U]$, and constants $\const{b}~\vec{C}$ used to model (co)inductive
+and stratified types.
+Here $\const{b}$ stands for an indexed type family and recall $U$ stands for an
+index type.
+%
+\input{figs/beluga-grammar}
+%
 Synthesizable terms include variables, constants, and simple and dependent
 function eliminations.
-% For simplicity, we treat constructors defined using
-% inductive or stratified types as constants.
-All synthesizable terms are checkable. Conversely, one uses a type
-annotation to embed a checkable term as a synthesizable term. This
-embedding notably enables using a contextual object as a \tcases scrutinee.
-% Note that patterns in case-expressions come with a refinement
-%substitution $\theta$. In practice, this refinement substitution is
-%inferred, but from a foundational perspective it is convenient to make
-%it explicit.
+All synthesizable terms are checkable.
+Conversely, a type annotation allows embedding a checkable term as a
+synthesizable term.
+This notably enables using a contextual object as a \tcases scrutinee.
 
-Checkable terms include
-simple and dependent function abstraction (\tfn{} and \tmlam{} resp.),
-boxed index objects $[C]$, and a \tcases expression.
-We also include for convenience two different let-expressions,
-$\tlets x = i\;\tins e$ and $\tletboxs X = i\;\tins e$, although both could be
-defined given the other terms in the language.
+Checkable terms include simple and dependent function abstraction (\tfn{} and
+\tmlam{} respectively), boxed index objects $[C]$, and a \tcases expression.
+We also include for convenience two different let-expressions
+$\tlets x = i\;\tins e$ and $\tletboxs X = i\;\tins e$,
+although in principle each could be defined using a function (\tfns and \tmlams
+respectively) that is immediately eliminated.
+Such a translation must be type-directed in our bidirectional setting, as
+functions are checkable terms which cannot appear on the left-hand side of a
+function elimination.
+Broadly speaking, such a translation would synthesize the type for $i$ in order
+to construct a type annotation for the anonymous function to embed it as the
+subject of the function elimination.
 
-\begin{figure}[bt]
-  \include{figs/beluga-types}
-\label{fig:beluga-types}
-\caption{\Beluga's bidirectional type system, and well-formedness of subgoal contexts.}
+\begin{figure}[tp]
+  \input{figs/beluga-types}
+  \caption{\Beluga's bidirectional type system, and well-formedness of subgoal contexts.}
+  \label{fig:beluga-types}
 \end{figure}
 
-Last, the syntax of checkable expressions contains contextual variables $g$ following
-\cite{Nanevski:ICML05,Boespflug:LFMTP11}, which we call
+Last, the syntax of checkable expressions contains contextual variables $\bar g$
+following \cite{Nanevski:ICML05,Boespflug:LFMTP11}, which we call
 \emph{subgoal variables}.
 A subgoal variable represents a typed hole in the program that remains to be
 filled by the programmer.
 It captures in its type $\goal{}$ the typechecking state at the point it occurs:
-it remains to show $\tau$ in the index context $\Delta$ with the assumptions in
-$\Gamma$.
-These subgoal variables are collected in a subgoal context $\Omega$.
-Algorithmically, we understand a subgoal context $\Omega$ not as an input to the
-typing judgments in Fig.~\ref{fig:beluga-types} but rather as an output: the set
-of holes in the program is computed by the judgment.
-This explains why we must \emph{check} a subgoal variable against a type $\tau$.
+it remains to construct a term that checks against $\tau$ in the index context
+$\Delta$ with the assumptions in $\Gamma$.
 Observe that subgoal variables appear only in the \emph{term} language: this
 ensures that subgoals cannot refer to each other.
 Since subgoals are independent of each other, they may be solved in any order by
@@ -187,57 +149,69 @@ the user.
 An expression is called \emph{complete} if it is free from subgoals, and
 \emph{incomplete} otherwise.
 
+Subgoal variables are collected in a \emph{subgoal context} $\Omega$.
+Algorithmically, we understand a subgoal context $\Omega$ not as an input to the
+typing judgments in Fig.~\ref{fig:beluga-types} but rather as an output: the set
+of holes in the program is computed by the judgment.
+This explains why we must \emph{check} a subgoal variable against a type $\tau$.
+
 Most of the typing rules in Fig.~\ref{fig:beluga-types} are as expected.
 To typecheck a \tcases expression, we infer the type of the expression that we
 want to analyze, then generate a covering set consisting of the pattern and the
 refinement substitution $\theta$.
-We then verify that the given set of patterns matches covering set using the
-primitive $\scovs(\Delta;\Gamma;\beta)$ which in turn relies on coverage for
-index objects $\scovs(\Delta;U)$.
+We then verify that the given set of patterns matches the covering set using the
+primitive $\scovs(\Delta;\Gamma;\beta)$ which in turn relies on the coverage
+primitive $\scovs(\Delta;U)$ for index objects.
 Similar to the coverage primitive for index types, the coverage primitive for
 computation-level base types also generates well-founded recursive calls and
-includes them as part of $\Gamma_k$.
-We can think of $\Gamma_k$ as an extension of $\Gamma$
-which includes any program variables from the pattern and any well-founded
-recursive calls.
-Finally, we type check each branch taking into account the refinement
-constraints that might arise from the pattern in addition to the
-context $\Gamma_k$.
-We omit the rules for checking patterns since pattern typing mirrors expression
-typing.
-As for the subgoal context, every rule's conclusion merely collects all premise
-subgoal contexts to propagate the subgoals downwards.
-Note that all subgoal variables are distinct and occur exactly once.
+includes in $\Gamma_k$.
+Concretely, $\Gamma_k$ is an extension of $\msubst{\theta_k}\Gamma$
+that includes any program variables bound by the pattern as well as any
+well-founded recursive calls.
+Finally, we check each branch considering the index susbtitution $\theta_k$
+that accounts for any index variable refinements induced by the pattern.
+We omit the typing rules for patterns: given that patterns are a subset of
+expressions, their typing mirrors expression typing.
 
-We omit here the kinding rules and the well-formedness rules for
+As for the subgoal context $\Omega$, every rule's conclusion collects all
+premise subgoal contexts to propagate the subgoals downwards.
+Note that all subgoal variables are distinct and occur exactly once: we
+allow neither weakening nor contraction for $\Omega$.
+We distinguish between subgoal variables $\bar g$ that stand for programs from
+those $g$ that stand for \emph{proofs} described in Sec.~\ref{sec:harpoon}.
+We call these \emph{program} subgoal variables and \emph{proof} subgoal
+variables, respectively.
+Observe that the latter form of subgoal variable cannot appear within programs,
+so the subgoal context $\Omega$ in Fig.~\ref{fig:beluga-types} only ever
+contains program subgoal variables, of the form $\bar g$.
+As expected, one can define a notion of substitution $\psubst{e^\prime/\bar g}e$
+that eliminates a subgoal variable, satisfying the following theorem.
+
+\begin{thm}[Subgoal Substitution Property 1]
+  If $\belchkjudg{\Omega,\; \bar g{:}\goal{^\prime}\mid\goalctx{}}{e}{\tau}$
+  and $\belchkjudg{\Omega^\prime\mid\goalctx{^\prime}}{e^\prime}{\tau^\prime}$,
+  then $\belchkjudg{\Omega,\Omega^\prime\mid\goalctx{}}{\psubst{e^\prime/\bar g}}{\tau}$.
+\end{thm}
+
+This property together with a corresponding one for proof subgoal variables is
+central to the soundness of interactive proof development in
+Sec.~\ref{sec:harpoon-actions}.
+
+We omit the kinding rules and the well-formedness rules for
 $\Delta$ and $\Gamma$. However, to emphasize that each subgoal type
 cannot depend on other subgoal types, we include the well-formedness
 rules for the subgoal context $\Omega$ in Fig.~\ref{fig:beluga-types}.
-%\\[0.5em]
-
-% Note that our typing rules, as given, neither enforce coverage nor
-% termination of a \Beluga{} program. To enforce coverage
-% While our presentation can be
-% generalized to take into account coverage and generation of recursive
-% calls on structurally smaller contextual objects
-% \cite{Pientka:TLCA15}, we prefer to keep the presentation simple.
-% In \Beluga, the programmer declare the
-% termination measure explicitly, and the generation of the covering
-% set, includes valid well-founded recursive calls based on the measure
-% specified by the programmer.
-% \inlinetodo{What to do with structurally smaller recursive calls?}
-% Our interactive command driven engine, will rely on the same  We
-% decided for this simplified presentation to focus on the essential
-% a
 
 \section{\Harpoon{} Script Language}
 \label{sec:harpoon}
 
 To build proofs interactively, we introduce interactive commands,
-called \emph{actions}, which are typed by the user into the \Harpoon{} interactive prompt.
+called \emph{actions}, which are typed by the user into the \Harpoon{}
+interactive prompt.
 %
-An action is executed on a particular subgoal and eliminates or
-transforms it, while possibly introducing new subgoals.
+An action is executed on a particular subgoal and eliminates it
+while possibly introducing new subgoals. Eliminating a subgoal with exactly one
+new subgoal can be understood as transforming the initial subgoal.
 %
 \[
   \begin{grammar}
@@ -251,79 +225,97 @@ transforms it, while possibly introducing new subgoals.
 \]
 %
 We only consider here a small subset of the tactics we support in
-\Harpoon{}; others and new ones can be added following the same principles: \ttintross introduces a
-series of assumptions; \ttsolve{} provides an explicit
-proof witness/term to close the current subgoal; \ttbys allows programmers
-to refer to a lemma, introduce an intermediate result, or use an
-induction hypothesis, and bind the result to an intermediate variable;
-\ttsplits generates a covering set of cases to consider;
-\ttsufficess allows programmers to reason backwards via a lemma or a
+\Harpoon{}; others and new ones can be added following the same principles:
+\ttintross introduces all available assumptions;
+\ttsolve{} provides an explicit term to close the current subgoal;
+\ttby{} allows to refer to a lemma, introduce an intermediate result, or use an
+induction hypothesis, binding the result to a new program variable;
+\ttunbox{} is the same as \ttby, but it binds its result to a new index variable;
+\ttsplit{} generates a covering set of cases to consider for a given scrutinee;
+\ttsuffices{} allows programmers to reason backwards via a lemma or a
 constructor.
 
-Behind the scenes, the interactive execution of tactics incrementally builds a
-(partial) proof script. This script reflects the structure of the proof very
-closely, and the core constructs of the proof script language closely resemble
-the syntax of actions.
-
-% The proof script language consists of two syntactic
-% categories: \emph{proof scripts} and \emph{directives}.
+Behind the scenes, executing a tactic builds a \emph{proof script} that
+represents it, and substitutes this script for the subgoal that the tactic
+eliminates.
+A proof script very closely reflects the structure of the proof, and the core
+constructs of the proof script language closely resemble the syntax of actions.
 %
 \input{figs/harpoon-grammar}
-%\begin{figure}[h]
-%  \caption{%
-%    The grammar of \Harpoon{} proof scripts.
-%  }
-%  \label{fig:harpoon-grammar}
-%\end{figure}
-\noindent
-We give the typing rules for partial \Harpoon{} proof scripts in Fig.~\ref{fig:harpoon-types}.
-In its simplest form, a proof script $P$ is either a subgoal variable $g$ or a
-directive $D$ that describes how to prove a given goal.
-The understanding of subgoal variables here is the same as in the previous
-section: it is a contextual variable of type $\goal{}$,
-representing the goal $\tau$ together with its index domain context $\Delta$
-and assumptions $\Gamma$.
-As before, subgoal variables cannot depend on other subgoal variables.
-Although we reuse the letter $g$, subgoal variables occurring in proof scripts
-stand for \emph{proof scripts} and not for programs.
+%
+We give the typing rules for proof scripts and directives in
+Fig.~\ref{fig:harpoon-types}.
+In its simplest form, a proof script $P$ is either a proof subgoal variable $g$
+or a directive $D$ that describes how to prove a given goal.
+The understanding of a subgoal variable here is the same as in the previous
+section: it is a contextual variable of type $\goal{}$, representing that it
+remains to show $\tau$ in the index context $\Delta$ with assumptions $\Gamma$.
+As before, proof subgoal variables cannot depend on any other subgoal variables.
+Given that expressions appear embedded within a proof script and that program
+subgoal variables may appear within these expressions, we have that the subgoal
+context $\Omega$ computed from a proof script may contain both forms of subgoal
+variable.
+We lift susbtitution of an expression for a program subgoal variable to proof
+scripts, writing $\psubst{e/\bar g}{P}$, and we define substitution of a proof
+script for a proof subgoal variable, written $\psubst{P^\prime/g}{P}$.
+These forms of substitution admit a soundness property.
 
+\begin{thm}[Subgoal Substitution Property 2] ~
+  \begin{enumerate}
+  \item
+    If $\belchkjudg{\Omega^\prime\mid\goalctx{^\prime}}{e}{\tau^\prime}$
+    and $\prfchkjudg{\Omega,\bar g{:}\goal{^\prime}\mid\goalctx{}}{P}{\tau}$,
+    then
+    $\prfchkjudg{%
+      \Omega,\Omega^\prime\mid\goalctx{}%
+    }{\psubst{e/\bar g}{P}}{\tau}$.
+
+  \item
+    If $\prfchkjudg{\Omega^\prime\mid\goalctx{^\prime}}{P^\prime}{\tau^\prime}$
+    and $\prfchkjudg{\Omega,g{:}\goal{^\prime}\mid\goalctx{}}{P}{\tau}$,
+    then
+    $\prfchkjudg{%
+      \Omega,\Omega^\prime\mid\goalctx{}%
+    }{\psubst{P^\prime/g}{P}}{\tau}$.
+  \end{enumerate}
+\end{thm}
+\begin{proof}
+  1. By induction on the typing for $P$, using Subgoal Substitution Property~1
+  when we arrive at an embedded expression $e$.
+  2. By induction on the typing for $P$.
+\end{proof}
+%
 We extend a proof script using \kwby{} or \kwunbox{} to introduce new
 assumptions.
-The \kwunbox{} construct is used to introduce a new index variable by unboxing
-the result of a given \Beluga{} term $i$, often an assumption from $\Gamma$.
 The \kwby{} construct is used both for invoking a lemma, introducing
 an intermediate result, and for appealing to an
 induction hypothesis, extending $\Gamma$ with a new variable representing the
-invocation. As we generate valid induction hypothesis when splitting
-on a variable, these induction hypothesis are indeed carried
-around. When the user appeals to an induction hypothesis, we check
-whether it is compatible with any of the generated induction
-hypothesis to ensure that the call is well-founded.
-%In \Beluga, induction hypotheses are kept in $\Gamma$ and
-%are generated when splitting on an induction variable. Recall that in
-%\Beluga, the user declares the termination measure explicitly and
-%hence the induction variables are known a priori.
-%Intuitively, \kwunbox{} and \kwby{} constructs
-%correspond to the two different let-expressions found in \Beluga{}
-%and help structure proofs. %
+invocation.
+The \kwunbox{} construct is identical to \kwby, but it binds a new
+index variable, requiring that the term being unboxed synthesize a boxed
+contextual type $[U]$.
+Often, one unboxes an assumption from $\Gamma$, but it is convenient to allow
+directly unboxing the result of an appeal to a lemma or an induction hypothesis,
+without first requiring that this result be bound to a program variable in
+$\Gamma$.
 
-\begin{figure}[h]
+To check well-foundedness of appeals to induction hypotheses, we adopt the
+approach used internally by \Beluga.
+When the user states a theorem, they must explicitly give a termination measure.
+Then, when splitting on a variable that participates in the termination measure,
+we can generate all valid induction hypotheses in advance and store them in the
+context $\Gamma$ (see \cite{Pientka:TLCA15}).
+Finally, when we encounter an appeal to an induction hypothesis, it suffices to
+check whether it is compatible with any of the precomputed ones in $\Gamma$.
+
+\begin{figure}[tp]
   \input{figs/proofs-types.tex}%
   \input{figs/directives-types.tex}%
   \caption{%
-    The type system for \Harpoon{} proofs and directives
-  }
-\label{fig:harpoon-types}
+    The type system for \Harpoon{} proofs and directives%
+  }%
+  \label{fig:harpoon-types}%
 \end{figure}
-
-
-% \begin{figure}[h]
-%   \include{figs/directives-types}
-%   \caption{%
-%     The type system for \Harpoon{} directives.
-%   }
-% \end{figure}
-
 
 There are four different directives we can use in a proof. The
 simplest directive, $\kwsolves e$, merely ends a proof script by
@@ -334,24 +326,43 @@ $\Gamma$, we use $\kwintross \hypoth{\goalctx{^\prime}}{P^\prime}$ where
 $\goalctx{^\prime}$ are extensions of $\Delta$ and $\Gamma$.
 %
 The new goal type $\tau^\prime$ and the extended contexts $\goalctx{^\prime}$
-are computed from the current subgoal by \emph{unrolling} it as in Fig.~\ref{fig:unroll}.
-At the same time as we are unrolling the type (formula) and building a
-partial proof script, we also build a partial program witness. This
-links already proof scripts to programs and we elaborate the full
-translation in Sec. \ref{sec:translation}. By construction, the
-resulting partial program expression is well-typed.
-The unrolling of a type stops once we reach a base type $\beta$,
-i.e. it is either $[U]$ (a contextual LF type) or a stratified or recursive type $\const{b}~\vec{C}$.
+are computed from the current subgoal by \emph{unrolling} it as in
+Fig.~\ref{fig:unroll}.
+This process stops once we reach a base type $\beta$.
+As the type is unrolled, the judgment also constructs a partial program
+that is used for the translation in Sec.~\ref{sec:translation}.
+Understood algorithmically, the unrolling judgment encodes a total function
+whose output respects an expected soundness property.
+\begin{thm}[Soundness of Unrolling]
+  \begin{enumerate}
+  \item
+    For any $\Delta$ and $\Gamma$ and any type $\tau$,
+    there exists a unique term $e$ such that
+    $\unrolljudg{(\goalctx{^\prime} \proves \beta)}{\goalctx{}}{e}{\tau}$, where
+    $\Delta^\prime$ and $\Gamma^\prime$ are extensions of $\Delta$ and $\Gamma$,
+    respectively.
 
-\begin{figure}[h]
-  \input{figs/unroll}
-  \caption{%
-    Unrolling a \Beluga{} type. By design, this judgment closely mirrors typing
-    and a soundness property holds:
-    if $\unrolljudg{\goalwith{\goalctx{^\prime}}\beta}{\goalctx{}}{e}{\tau}$, then
-    $\belchkjudg{g : \goalwith{\goalctx{^\prime}}{\beta} \mid \goalctx{}}{e}{\tau}$.
-  }
-  \label{fig:unroll}
+  \item
+    If $
+    \unrolljudg{
+      \goalwith{\goalctx{^\prime}}{\beta}
+    }{\goalctx{}}{\tau}{e}
+    $, then $
+    \belchkjudg{
+      g : \goalwith{\goalctx{^\prime}}{\beta} \mid \goalctx{}
+    }{e}{\tau}
+    $.
+  \end{enumerate}
+\end{thm}
+%
+\begin{proof}
+  1. By induction on $\tau$; 2. by induction on the given derivation.
+\end{proof}
+
+\begin{figure}[htp]
+  \input{figs/unroll}%
+  \caption{Unrolling a \Beluga{} type.}%
+  \label{fig:unroll}%
 \end{figure}
 
 % Unrolling a subgoal $\goal{}$ produces a new subgoal $\goal{^\prime}$ whose type
@@ -372,12 +383,11 @@ i.e. it is either $[U]$ (a contextual LF type) or a stratified or recursive type
 % or from appealing to a lemma. We support splitting on both index
 % domain types and Beluga types.
 
-The directive
-$\kwsplit$ breaks up the proof into cases, one for each
+The directive $\kwsplit$ breaks up the proof into cases, one for each
 constructor of the type $\tau^\prime$ of the term $i$ being split on.
-The \scov{} primitive computes a covering set of
-cases and generates well-founded recursive calls based on the
-user-defined termination measure (see \cite{Pientka:TLCA15}).
+The \scov{} primitive computes a covering set of cases and generates
+well-founded recursive calls based on the user-defined termination measure
+(see \cite{Pientka:TLCA15}).
 Each computed 4-tuple contains the pattern $p_k$ (unused here, but used and
 explained in Sec.~~\ref{sec:translation}), a refinement substitution $\theta_k$
 such that $\Delta_k \proves \theta_k : \Delta$, and contexts $\Delta_k$ and
@@ -401,26 +411,7 @@ fullfilling the stated proof obligation $\msubst{\theta}\tau^\prime_k$. In pract
 computed by unification given both the goal type $\tau_0$ and the
 target type $\tau_0^\prime$.
 
-Of note is that all \Beluga{} terms appearing within a \Harpoon{} proof are
-required to be complete, i.e. they are not allowed to contain open subgoals
-themselves. However, we believe that relaxing this requirement would
-be useful and simple. To illustrate its usefulness, consider wanting
-to apply a lemma, but we must still construct a derivation for one of
-the arguments. Being able to use an open subgoal \lstinline!g! (notation for an open
-subgoal) as an argument when calling the lemma, would provide us more
-flexibility in how we want to develop the proof and constitutes a more
-general form of the \lstinline!suffices! action. At the same time,
-this is easy to accomplish as all arguments to a lemma would be
-checked. This generalization would however complicate our proof script
-language, as we need to replace \lstinline!g! with the proof term it
-represents when calling the lemma. This then either requires embedding the syntax
-of proofs into the syntax of (checkable) terms or invoking the translation
-presented in Sec.~\ref{sec:translation} to eliminate a term-level
-subgoal variable with an aactual \Harpoon{} proof witness.
-Either of these choices would significantly impact the complexity of the
-presentation, however, so we choose to leave this as future work.
-
-\section{Interactive Proof Development in \Harpoon }
+\section{Interactive Proof Development}
 \label{sec:harpoon-actions}
 
 We now describe the generation of a proof script based on the
@@ -428,19 +419,17 @@ actions in Fig.~\ref{fig:interactive}. This relationship is by
 design both immediate and straightforward.
 
 %%%%% INTERACTIVE HARPOON TYPING
-\begin{figure}[htb]
- \include{figs/interactive-harpoon-types}
-
+\begin{figure}[htp]
+  \input{figs/interactive-harpoon-types}%
   \caption{%
-    Typechecking interactive actions and elaboration into partial proof scripts.
-  }
-  \label{fig:interactive}
+    Typing of interactive actions and elaboration into proof scripts.
+  }%
+  \label{fig:interactive}%
 \end{figure}
 
 Each action is simply elaborated into its corresponding construct in the proof
 script language, using subgoal variables where appropriate to explicitly model
-the remaining proof obligations. Observe once again that any \Beluga{} term
-appearing as part of an action is required to be complete.
+the remaining proof obligations.
 %
 % The \ttsolve{} action is the simplest: it merely solves the current goal when
 % given a term $e$ of the current goal type. Often, this term is simply a
@@ -482,13 +471,13 @@ i.e.~$\prfchkjudg{\Omega \mid \goalctx{}}{P}{\tau}$. %
 In other words, individual actions produce well-typed partial
 proofs and the proof refinement in the \isingle{} rule preserves types.
 
-\begin{figure}[h]
-  \include{figs/interactive-harpoon-sequence}
+\begin{figure}[ht]
+  \input{figs/interactive-harpoon-sequence}%
   \caption{%
     Rules for sequencing interactive \Harpoon{} actions.
     Note that we can reorder $\Omega$ which allows us in principle to work on
-    any subgoal in $\Omega$ in the \isingle{} rule.
-  }
+    any subgoal in $\Omega$ in the \isingle{} rule.%
+  }%
   \label{fig:harpoon-session}
 \end{figure}
 %
@@ -584,8 +573,8 @@ It follows from a straightforward induction that the translation is total and
 type-preserving.
 
 % TRANSLATION RULES
-\begin{figure}[h]
-  \include{figs/translation}
+\begin{figure}[hp]
+  \input{figs/translation}%
   \caption{%
     The translation from a \Harpoon{} proof script to a \Beluga{} program.%
   }%

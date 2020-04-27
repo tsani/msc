@@ -1,7 +1,5 @@
-
-\renewcommand*{\arraystretch}{0.3}
 \chapter{Proof Development in \Harpoon}
-\label{sec:example}
+\label{chap:example}
 
 We introduce the main features of \Harpoon{} by considering two
 lemmas that play a central role in proof of weak normalization of
@@ -13,12 +11,8 @@ Second, the Backwards Closed Property states that if a well-typed term
 \lstinline!M'! is reducible and \lstinline!M! reduces to \lstinline!M'!, then
 \lstinline!M! is also reducible.
 
-\inlinetodo{%
-  Conduct the proof ``on paper'' first, and then show the mechanization with
-  Harpoon?%
-}
-
 \section{Initial setup: encoding the language}
+\label{sec:setup-1}
 We begin by defining the simply-typed lambda-calculus in the logical
 framework LF \cite{Harper93jacm} using an intrinsically typed
 encoding.
@@ -184,11 +178,10 @@ Finally, we can finish the proof by supplying the term
 
 
 \section{Setup continued: reducibility}
-We now proceed to define
-% normalization using
-%using reducibility candidates
-%\cite{GirardLafontTaylor:proofsAndTypes}. In essence, we define
-a set of terms \emph{reducible} at a type \lstinline!T!. %
+\label{sec:setup-2}
+We now proceed to define normalization using using reducibility candidates
+\cite{GirardLafontTaylor:proofsAndTypes}.
+In essence, we define a set of terms \emph{reducible} at a type \lstinline!T!. %
 All reducible terms are required to halt, and terms reducible at an arrow type
 are required to produce reducible output given reducible input.
 Concretely,  a term
@@ -213,21 +206,15 @@ stratified Reduce : {T : [⊢ tp]} [⊢ tm T] → type =
         → Reduce [⊢arr T1 T2] [⊢M];
 \end{lstlisting}
 
-
-% over the closed term \lstinline!N! of type \lstinline!T1!.
-
-
 \section{%
   Backwards Closed Property: tactics \ttmsplit, \ttsuffices, and \ttby%
 }
-
-
 
 We now consider one of the key lemmas in the weak normalization proof,
 called the backwards closed lemma, i.e.  if \lstinline!M'! is
 reducible at some type \lstinline!T! and \lstinline!M! steps to
 \lstinline!M'!, then \lstinline!M! is also reducible at \lstinline!T!.
-%
+
 We prove this lemma by induction on \lstinline!T!. This is
 specified by referring to the position of the induction variable in
 the statement.
