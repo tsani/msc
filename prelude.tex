@@ -19,7 +19,9 @@
 %% the *figure* instead of to the top of the *caption* !
 \usepackage[all]{hypcap}
 
-\renewcommand{\baselinestretch}{1.5}
+\usepackage{setspace}
+\onehalfspacing
+% \renewcommand{\baselinestretch}{1.5}
 
 %%% TiKZ begin
 
@@ -50,6 +52,7 @@
 \definecolor{burntumber}{rgb}{0.54, 0.2, 0.14}
 
 \usepackage{listings}
+\usepackage{lstcoq}
 
 \newcommand{\nicettfamily}{%
   \fontseries{l}\selectfont
