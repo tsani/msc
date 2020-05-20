@@ -128,9 +128,17 @@
     \textsc{#1}%
   }%
 }
+\mksystemname{Harpoon}
+
+% I only want Harpoon to be formatted specially.
+% All other systems will use ordinary formatting.
+\renewcommand{\mksystemname}[1]{%
+  \expandafter\newcommand\csname #1\endcsname{%
+    #1%
+  }%
+}%
 \mksystemname{Abella}
 \mksystemname{Beluga}
-\mksystemname{Harpoon}
 \mksystemname{Coq}
 \mksystemname{Agda}
 \mksystemname{Isabelle}
