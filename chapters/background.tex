@@ -409,10 +409,8 @@ I briefly discuss each of these lines of work.
 \newcommand{\mtac}{\bigcirc}
 The Mtac project broadly aims to give a static type system to tactics,
 encapsulating the effects that tactics wish to use inside a monad.
-% Ltac is a dynamically-typed language without any useful debugger, which makes
-% the development of large Ltac programs extremely difficult.
-Mtac extends Coq with a monadic type family $\mtac$ for forming a types $\mtac
-\tau$ that express that if the tactic terminates successfully, then it generates
+Mtac extends Coq with a monadic type family $\mtac$ for forming a type $\mtac
+\tau$ that expresses that if the tactic terminates successfully, then it generates
 a Coq term of type $\tau$.
 The constructors for this type family include the usual monadic operations,
 together with many useful combinators for tactic programming, e.g. fixed points,
@@ -444,8 +442,8 @@ concrete Coq datatype, transformed according to the implementation of the
 tactic, and then \emph{reflected} (unquoted) back.
 
 Rtac distinguishes itself from other reflective metaprogramming techniques
-(e.g. in Agda~\cite{agda-reflection}) by allowing the user to define a custom
-concrete syntax that is the target of reification.
+(e.g. in Agda~\cite{agda-reflection} or in Template-Coq) by allowing the user to
+define a custom concrete syntax that is the target of reification.
 Hence, a tactic needs only to consider the cases for that syntax instead of the
 syntax for the entire assistant.
 
@@ -461,11 +459,11 @@ Such an Ltac program is not particularly hard to write, but the generated proof
 following this strategy is generally quadratic in the size of the input.
 A more clever proof would flatten these expressions into lists and
 check that one is a permutation of the other.
-This approach is described in detail in~\cite{rtac} and is linear in the input
-size.
-It turns out that on large enough input sizes (8 elements in the commutative
-monoid equivalence example), the improved asymptotics outweigh the cost of
-reification and reflection.
+Malecha describes this technique in detail in~\cite{rtac} using Rtac, and the
+resulting proof is linear in the input size.
+On large enough input sizes (8 elements in the commutative monoid equivalence
+example), these improved asymptotics outweigh the cost of reification and
+reflection.
 
 Alas, there are some additional requirements to make this approach work:
 the user must prove a soundness lemma for their tactic.
