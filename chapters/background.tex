@@ -664,6 +664,12 @@ straight from standard algorithms textbooks.
 \section{Structured editing}
 \label{sec:structured-editing}
 
+Although Harpoon uses a tactic language for interfacing with the user, these
+tactics are not really of primary interest, since they are not
+recorded.
+Instead, applying a tactic elaborates a (partial)
+\emph{structured proof script}, which is recorded to a file.
+Therefore, we can see Harpoon as a high-level editor for proof scripts.
 An editor aware of the structure of the document being edited is called a
 \emph{structured editor}%
 \footnote{%
