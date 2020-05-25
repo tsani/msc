@@ -769,11 +769,135 @@ results concerning the interactive nature of their system, which they call a
 \emph{structured editor calculus}.
 Recall that Hazelnut has a notion of cursor that is superimposed onto
 expressions.
-Furthermore, the type system has an explicit notion of a cursor in the program,
-using Huet's zipper construction~\cite{zipper}.
+The programmer manipulates the cursor and constructs AST nodes using interactive
+commands called \emph{actions}.
+Here is a summary of the main results concerning actions.
+All this metatheory is mechanized in Agda.
+\begin{itemize}
+\item The program is invariant under movement actions, i.e. movement actions
+  affect only the cursor.
+\item From any cursor position, a sequence of movement actions exists
+  to bring the cursor to any other position.
+\item For any well-typed expression, there exists a sequence of actions to
+  construct it interactively.
+\end{itemize}
+
+Hazelnut's edit actions bear a resemblance to tactics.
+A key difference is that in tactic-based systems, the cursor is less explicit and
+can be focused only on a subgoal, whereas in Hazelnut the cursor can be moved
+around anywhere in the expression.
+Hazelnut's edit actions include also a command for deleting a node, replacing it
+with a subgoal.
+This is more general than a mere undo mechanism as it appears in tactic-based
+systems.
+
+The notion of nonempty holes in Hazelnut gives a uniform way to handle backwards
+reasoning. This distinguishes Hazelnut from traditional tactic-based systems,
+which employ special tactics for backwards reasoning.
+However, any backwards reasoning performed in a nonempty hole is obscured in the
+final expression: by merely seeing a function application, for example, one
+cannot know whether it was constructed in a forwards or backwards style.
 
 \section{Beluga}
 \label{sec:beluga-intro}
+
+Harpoon is an interactive frontend for Beluga~\cite{Cave:POPL12}.
+One develops a proof interactively using Harpoon, and this proof can either
+remain as a proof script, or it can be translated into a Beluga program.
+It is this translation that justifies our claim that a Harpoon proof script
+truly does represent a proof.
+Considering this, it is essential to first describe Beluga.
+The main technical exposition of Beluga is given in Sec.~\ref{sec:beluga}
+before we describe Harpoon's metatheory, so this section will focus Beluga's
+proof-theoretic background and on a high-level overview.
+
+\subsection{Contextual Modal Type Theory}
+
+Beluga is based on Contextual Modal Type Theory~\cite{Nanevski:ICML05}.
+Although Beluga is dependently-typed, I will discuss the simply-typed Contextual
+Modal Type Theory here.
+This theory can be obtained from simple type theory by internalizing the notion
+of \emph{context}.
+First, the syntax of types is extended to include the form $[\Psi]A$, called a
+\emph{boxed type}.
+A term of this type represents a hypothetical derivation depending on the
+context $\Psi$ and concluding $A$.
+Second, the typing judgment $\Delta; \Gamma \proves t : A$ mentions two
+contexts:
+$\Gamma$ contains ordinary assumptions whereas $\Delta$ contains contextual
+assumptions.
+A contextual assumption has the form $u : A[\Psi]$ in which the
+contextual variable $u$ expresses that $A$ is true in the context $\Psi$.
+Contextual variables are also called \emph{metavariables}.
+One must take care to distinguish an ordinary assumption of a boxed type
+$x : [\Psi]A$ from a contextual assumption $u : A[\Psi]$.
+The introduction and elimination rules for boxed types are the following.
+\[
+  \infer{%
+    \Delta; \Gamma \proves \mathsf{box}(\Psi.\; M) : [\Psi]A
+  }{%
+    \Delta; \Psi \proves M : A
+  }
+  \quad
+  \infer{%
+    \Delta; \Gamma \proves \mathsf{letbox}(M, u.\; N) : C
+  }{%
+    \Delta; \Gamma \proves M : [\Psi]A
+    &
+    \Delta, u{:}A[\Psi]; \Gamma \proves N : C
+  }
+\]
+In the introduction rule, $M$ is a hypothetical derivation concluding $A$ and
+depending on the assumptions $\Psi$.
+In the elimination rule, we wish to prove $C$ using the hypothetical derivation
+$M$ depending on $\Psi$. The context $\Delta$ becomes extended with a new
+contextual variable, and we conduct the proof $N$ of $C$ in this extended
+context.
+In other words, rather than demand upfront that the assumptions $\Psi$ be
+instantiated with some terms, this is delayed until the moment that the
+contextual variable is used. To use a contextual variable, one provides an
+explicit substitution that maps the context of that assumption into the current
+context.
+\[
+  \infer{%
+    \Delta, u{:}A[\Psi]; \Gamma \proves \mathsf{clo}(u, \sigma) : A
+  }{%
+    \Delta, u{:}A[\Psi]; \Gamma \proves \sigma : \Psi
+  }
+\]
+
+Now let us see how these ideas scale up to dependent types and are applied in
+Beluga.
+Beluga is a two-layer system:
+the language one writes inside a box differs from the language one writes
+outside the box.
+Inside the box, one uses LF~\cite{Harper93jacm} to uniformly represent the
+syntax and the derivations of an encoded language.
+(We discuss concretely in Chap.~\ref{chap:example} how to encode a language in
+Beluga, using the simply-typed lambda calculus as an example.)
+
+\inlinetodo{I AM HERE}
+
+
+Beluga is a dependently-typed functional programming language.
+Following the Curry-Howard correspondence, a proof is represented as a total
+function understood as mapping the premises of a theorem to its conclusion.
+Beluga's form of dependent types differs from that in languages such as Coq or
+Agda.
+One can quantify over any type in those systems, whereas in Beluga one
+quantifies only over a specific index domain.
+In general, this index domain can be natural numbers, strings, or
+lists~\cite{ChH03Pha, Xi:POPL03}, but Beluga fixes the domain to be (contextual)
+LF objects and first-class contexts and substitutions over these objects.
+LF is well-suited for encoding languages with binders, using higher-order
+abstract systax (HOAS)~\cite{something-for-hoas}.
+Not only does the indexed type system help simplify Beluga's metatheory, but it
+also enforces a separation between the language's encoding and its metatheory.
+
+
+
+
+
 
 %
 %%% Local Variables:
