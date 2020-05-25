@@ -676,6 +676,7 @@ An editor aware of the structure of the document being edited is called a
   Other names include \emph{structural editor}, \emph{syntax-directed editor},
   and \emph{projectional editor}.%
 }.
+
 Usually, editing source code means writing text which is then parsed according
 to the grammar of the language being written.
 Nothing prevents writing text that is unmeaningful: one can easily write in
@@ -709,14 +710,13 @@ structured editor in which every edit state is semantically meaningful.
 That is, every edit state is well-typed.
 
 The challenge in this development is to preserve some degree of
-user-friendliness: naively enforcing typing would force the user to construct
+user-friendliness: naively enforcing typing would require the user to construct
 programs in a very rigid, outside-in form.
 For instance, the user would have to identify that they wish to construct a
-function application before they identify the function they wish to
-call.
-Even worse, in a functional language encouraging currying, they would have to
-construct the appropriate number of application nodes before specifying the
-function to call.
+function \emph{application} before they identify the function they wish to call.
+Even worse, in a functional language encouraging currying, due to
+left-associativity, the programmer would have to construct the appropriate
+\emph{number} of application nodes before specifying the function to call!
 
 The solution to this is one of Hazelnut's key innovations:
 a hole in a program may be \emph{nonempty}.
@@ -730,15 +730,44 @@ application $f\;a$ for some $f : A \to B$ and $a : A$.
 We first construct a reference to the function $f$.
 This is ill-typed: the expected type is $B$ but the inferred type of $f$ is $A
 \to B$.
-Thus the reference to $f$ is placed \emph{inside} the hole, witnessing the type
+Thus the variable $f$ is placed \emph{inside} the hole, witnessing the type
 mismatch.
-Then, inside the hole we construct the application node and specify the argument
-$a$.
+Then, inside the hole we construct the application node, placing the variable
+$f$ as the left child and specify the argument $a$ as the right child.
 The type of the expression inside the hole is now $B$, matching the expected
 type outside the hole, so the hole vanishes, becoming replaced by its contents.
 
-To properly separate the notion of inferred versus expected type, Hazelnut is
-presented as a bidirectional type system, with holes classified as checkable
+\newcommand{\hole}[1]{\llparenthesis #1 \rrparenthesis}
+To properly separate the notions of inferred and expected type, Hazelnut is
+presented as a bidirectional type system.
+Both empty holes $\hole{}$ and nonempty holes $\hole{e}$ are classified as
+synthesizable expressions.
+A nonempty hole's body $e$ must synthesize some type $\tau$, so the hole must be
+internally well-typed, but both an empty and a nonempty hole synthesize the hole
+type $\hole{}$.
+Note that although \emph{expression holes} may be nonempty, \emph{type holes}
+are always empty.
+
+In a traditional bidirectional type system, the rule for switching from the
+checking mode to the synthesis mode has the additional premise that the
+synthesized type be convertible (or made convertible via unification) with the
+type being checked against.
+In Hazelnut, the notion of type equality used in this situation is called
+\emph{type consistency}, and crucially it accounts for the hole type $\hole{}$
+being ``equal'' to any other type.
+As for checking against the hole type, additional consideration is necessary.
+Consider the situation $\Gamma \proves \lambda x.\; e \chk \hole{}$.
+The hole type $\hole{}$ expands into $\hole{} \to \hole{}$ so that the
+context is extended with the declaration $x{:}\hole{}$ and the body of the
+lambda is further checked against $\hole{}$.
+Extending the system with additional type formers (e.g. product types or sum
+types) requires corresponding new judgments to handle such hole type expansions.
+
+Hazelnut's metatheory is rich and interesting: not only are the traditional
+progress and preservation theorems proven, but also the authors show several
+results concerning the interactive nature of their system, which they call a
+\emph{structured editor calculus}.
+Recall that Hazelnut has a notion of cursor that is superimposed onto
 expressions.
 Furthermore, the type system has an explicit notion of a cursor in the program,
 using Huet's zipper construction~\cite{zipper}.
