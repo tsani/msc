@@ -1,10 +1,8 @@
 \declarejudgment{%
-  $\boxed{
-\itrnsjudg{\Delta;\Gamma}{\tau}{\action}{\Omega}{P}
-}$
+  $\boxed{\itrnsjudg{\Delta;\Gamma}{\tau}{\action}{\Omega}{P}}$%
 }{%
   Action $\action$ applied to subgoal $\goal{}$
-  produces a proof script $P$ with subgoals $\Omega$
+  produces a proof script $P$ with subgoals $\Omega$%
 }
 
 \[
@@ -17,7 +15,7 @@
     \\[1em]
   \infer{%
     \itrnsjudg{\Delta;\Gamma}{\tau}{\ttintros}{g : \goalwith {\goalctx{^\prime}} \beta}{%
-      \kwintross \hypoth{\goalwith {\goalctx{^\prime}} \beta}{g}
+      \kwintross \hypoth{{\goalctx{^\prime}}}{g}
     }
   }{%
     \unrolljudg{\goalwith {\goalctx{^\prime}} \beta}{\goalctx{}}{e}{\tau}
