@@ -599,18 +599,26 @@ Rather than use a pattern matching construct, which is quite complex in the
 presence of dependent types (see \cite{goguen-eliminating-2006}), \lhol{} uses
 eliminators.
 That is, when one defines a new inductive type, the system synthesizes a special
-constant called an \emph{eliminator} for that type. This is essentially a
-function from the newly defined type into some other type family of one's
-choosing%
-\footnote{%
-  To use Conor McBride's terminology, this family is called the \emph{motive} of
-  the elimination~\cite{mcbride-elimination-2002}.%
-}.
+constant called an \emph{eliminator} for that type.
+The eliminator represents the induction principle for the type.
+This is essentially a function from the newly defined type into some other type
+family of one's choosing, sometimes called a
+\emph{motive}~\cite{mcbride-elimination-2002}.
 To use the eliminator, one must also provide a number of \emph{methods}: given
 that an inductive type is a sum of products, each method handles one branch of
 the sum. Recursive occurrences of the inductive type within a branch become
 replaced by the motive. From a proof-theoretic point of view, these replacements
-correspond to available induction hypotheses.
+correspond to the induction hypotheses.
+As a concrete example, consider the type $\mathbb{N}$ of natural numbers.
+The natural eliminator one obtains for $\mathbb{N}$ is
+\[
+  % \Pi P{:}\mathbb{N} \to \mathsf{Type}.\;
+  \mathsf{elim}_\mathbb{N} :
+  P\;\mathsf{z} \to
+  (\Pi n{:}\mathbb{N}.\; P\; n \to P\;(\mathsf{s}\; n)) \to
+  \Pi n{:}\mathbb{N}.\; P\; n
+\]
+where the motive $P$ is a type family indexed by $\mathbb{N}$.
 
 The benefit of using eliminators over the more familiar pattern matching and
 explicit recursion is that eliminators greatly simplify totality checking.
@@ -808,12 +816,12 @@ It is this translation that justifies our claim that a Harpoon proof script
 truly does represent a proof.
 Considering this, it is essential to first describe Beluga.
 The main technical exposition of Beluga is given in Sec.~\ref{sec:beluga}
-before we describe Harpoon's metatheory, so this section will focus Beluga's
-proof-theoretic background and on a high-level overview.
+before we describe Harpoon's metatheory, so this section focuses on a high-level
+overview of Beluga.
 
 \subsection{Contextual Modal Type Theory}
 
-Beluga is based on Contextual Modal Type Theory~\cite{Nanevski:ICML05}.
+Beluga is based on Contextual Modal Type Theory (CMTT)~\cite{Nanevski:ICML05}.
 Although Beluga is dependently-typed, I will discuss the simply-typed Contextual
 Modal Type Theory here.
 This theory can be obtained from simple type theory by internalizing the notion
@@ -866,38 +874,139 @@ context.
   }
 \]
 
+\subsection{Contextual types in Beluga}
+
 Now let us see how these ideas scale up to dependent types and are applied in
 Beluga.
-Beluga is a two-layer system:
-the language one writes inside a box differs from the language one writes
-outside the box.
-Inside the box, one uses LF~\cite{Harper93jacm} to uniformly represent the
-syntax and the derivations of an encoded language.
+In the presentation of CMTT above, the system is homogeneous in the sense that the
+language of terms inside a box is the same as the language of terms outside a
+box. In principle this means one can nest boxes arbitrarily deep.
+Beluga, in contrast, limits this nesting to one level, given that the language
+inside a box differs from the language one writes outside a box.
+Inside a box, one uses LF~\cite{Harper93jacm} to uniformly represent the syntax
+and the derivations of an encoded language.
+In general, the language used inside a box is called an \emph{index language}
+and it could be natural numbers, strings, or lists~\cite{ChH03Pha, Xi:POPL03},
+but given Beluga's focus on mechanized metatheory, LF is a good choice as it
+gives concise and elegant representations of binding structures.
 (We discuss concretely in Chap.~\ref{chap:example} how to encode a language in
 Beluga, using the simply-typed lambda calculus as an example.)
 
-\inlinetodo{I AM HERE}
+Beluga goes slightly beyond pure contextual LF for its index language, by
+allowing quantification over contexts.
+%and even substitutions~\cite{subst-vars}.
+These quantifiers bind \emph{context variables}.
+% and \emph{substitution variables} respectively.
+Context variables in particular are key to expressing even basic
+metatheorems about formal systems.
+For example, consider the type uniqueness theorem for the simply-typed lambda
+calculus (in which the parameter of an abstraction is equipped with a type
+annotation).
+\begin{center}
+  If $\Gamma \proves M : A$ and $\Gamma \proves M : B$, then $A = B$.%
+\end{center}
+This theorem cannot be proven without somehow generalizing over contexts, as the
+case for abstractions $M = \lambda x{:}A.\; M^\prime$ requires extending
+$\Gamma$ with an additional declaration to use the induction hypothesis.
+We state this theorem as the following type in Beluga, using the function
+space \lstinline!->! to model implications as is often the case in proof
+assistants based on type theory.
+\begin{lstlisting}[gobble=2]
+  unique : (g:ctx) [g |- oftype M A[]] -> [g |- oftype M B[]] -> [|- eq A B]
+\end{lstlisting}
+Whereas terms are classified by types, contexts are classified by
+\emph{schemas}.
+In the above function type, the syntax \lstinline!(g : ctx)! binds a context
+variable \lstinline!g! with the schema \lstinline!ctx!.
+Note that this schema is not built in to Beluga: one must separately define it,
+specifying the form of the declarations it is allowed to contain.
+In this example, we would define \lstinline!ctx! as containing declarations that
+associate a variable to a type.
+This represents another departure from basic CMTT, in which the internalized
+contexts are precisely the contexts of CMTT itself.
+Since Beluga aims to model various formal systems and since the notion of
+context can vary from system to system, Beluga must therefore also support
+modelling these contexts.
 
+What Beluga retains from CMTT, however, is the notion of metavariable.
+Consider again the type of \lstinline!unique! and observe that the variables
+\lstinline!M!, \lstinline!A!, and \lstinline!B! are free.
+Beluga automatically abstracts over these and infers their type by a process
+called type reconstruction (see \cite{abstraction}).
+The internal type generated by type reconstruction is
+\begin{lstlisting}[gobble=2]
+  (g:ctx) {M : (g |- tm)} {A : (|- tp)} {B : (|- tp)}
+  [g |- oftype M A[]] -> [g |- oftype M B[]] -> [|- eq A B]
+\end{lstlisting}
+where we use \lstinline!{ }! to express an explicit Pi-type,
+which is the type-theoretic analogue of a universal quantifier.
+As in CMTT, to \emph{use} a metavariable, we must associate it with an explicit
+substitution to mediate between its context and the context at the use site.
+This is seen explicitly in \lstinline![g |- oftype M A[]]!, where the explicit
+weakening substitution \lstinline![]! is associated to \lstinline!A!.
+on the other hand, no substitution seems to be associated to \lstinline!M!:
+as a programming convenience, omitting a substitution is syntactic sugar for the
+identity substitution, \lstinline![..]!.
+Notice that since metavariables in Beluga stand for contextual LF terms, they
+can appear only within boxes, whereas in CMTT, being homogeneous, they can
+appear anywhere provided that an appropriate substitution is given.
 
+\subsection{Programming with contextual types}
+
+Now let us shift our focus to Beluga's programming language, in which one
+manipulates these contextual objects.
 Beluga is a dependently-typed functional programming language.
-Following the Curry-Howard correspondence, a proof is represented as a total
-function understood as mapping the premises of a theorem to its conclusion.
 Beluga's form of dependent types differs from that in languages such as Coq or
 Agda.
-One can quantify over any type in those systems, whereas in Beluga one
-quantifies only over a specific index domain.
-In general, this index domain can be natural numbers, strings, or
-lists~\cite{ChH03Pha, Xi:POPL03}, but Beluga fixes the domain to be (contextual)
-LF objects and first-class contexts and substitutions over these objects.
-LF is well-suited for encoding languages with binders, using higher-order
-abstract systax (HOAS)~\cite{something-for-hoas}.
-Not only does the indexed type system help simplify Beluga's metatheory, but it
-also enforces a separation between the language's encoding and its metatheory.
+One can quantify over any type in those systems, whereas in Beluga
+quantification is over contextual types, as we have seen in the reconstructed
+type of \lstinline!unique!.
+Following the Curry-Howard correspondence, a proof is represented as a total
+recursive function understood as mapping the premises of a theorem to its
+conclusion.
+These total functions are written by using (dependent) pattern matching on boxed
+objects, representing derivations.
 
+Dependent pattern matching has two essential components in Beluga.
+First, the type of the pattern is unified with the type of the scrutinee.
+Second, in the case of matching on a contextual object, the pattern itself is
+unified with the scrutinee.
+These unifications produce a \emph{refinement substitution} $\theta$, one for
+each branch.
+This susbtitution refines the types of other assumptions as well as the goal
+type: if the case expression as a whole is to be a term of type $\tau$, then
+the $i$th branch is to have type $\msubst{\theta_i}{\tau}$.
 
+\begin{sloppypar}
+To illustrate the effect of dependent pattern matching, consider again the type
+of \lstinline!unique!.
+Now suppose we perform a case analysis on the metavariable
+\lstinline!M : (g |- tm)! and suppose further that we have the assumptions
+\lstinline!d1 : [g |- oft M A[]]! and \lstinline!d2 : [g |- oft M B[]]!.
+One branch of this case analysis is for \lstinline!M! $=$ \lstinline!app M1 M2!,
+so the refinement substitution in that branch is $\theta = $ \lstinline!app M1 M2 / M!.
+This means that in the branch, the types of the assumptions \lstinline!d1! and
+\lstinline!d2! have changed: e.g. \lstinline!d1 : [g |- oft (app M1 M2) B[]]!.
+\end{sloppypar}
 
+Given that Beluga uses recursion and pattern matching rather than eliminators,
+the totality checking puzzle is more complicated.
+%It has two pieces.
+First, all case expressions must be covering.
+This is ensured by a coverage analysis~\cite{Pientka:TLCA15}.
+Second, all recursive calls must be well-founded.
+To ensure this, each function must be annotated with an \emph{induction order}.
+The simplest such order specifies that induction is on a specific premise.
+Then, when splitting on that premise using pattern matching, each subterm in a
+pattern is used to generate an induction hypothesis.
+The full list of these induction hypotheses is carried around during
+typechecking, so when a recursive call is encountered in the program, it
+suffices to check that it is among the list of available induction hypotheses.
 
-
+We end the discussion of Beluga for now, returning with a more detailed and
+technical description in Sec.~\ref{sec:beluga}.
+In the next chapter, we see how to encode a language in Beluga and how to use
+Harpoon to prove properties about it.
 
 %
 %%% Local Variables:
