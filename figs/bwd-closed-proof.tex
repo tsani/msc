@@ -68,7 +68,8 @@ Computational context:
 \linewidthline
 \begin{lstlisting}
 Reduce [|-b] [|-M]
-> by halts_step s h' as h; 
+> by halts_step s h'
+  as h;
   solve Unit h
 \end{lstlisting}
 \end{eventable}
@@ -76,7 +77,7 @@ Reduce [|-b] [|-M]
 
 
 \caption{%
-%   Interactive session 
+%   Interactive session
 % Part A of the
   Backwards closed lemma. Step 1: Case analysis of the type
   \lstinline!T!; Steps 2 and 3: Base case (\lstinline!T!~$=$~\lstinline!b!).

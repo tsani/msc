@@ -28,7 +28,7 @@ Meta-context:
   M : ( |- tm T)
   M' : ( |- tm T)
   M2 : ( |- tm T)
-  S : ( |- mstep M' M2)
+  S : ( |- steps M' M2)
   V : ( |- val M2)
 
 Computational context:
@@ -47,7 +47,7 @@ Meta-context:
   M : ( |- tm T)
   M' : ( |- tm T)
   M2 : ( |- tm T)
-  S : ( |- mstep M' M2)
+  S : ( |- steps M' M2)
   V : ( |- val M2)
   S' : ( |- step M M')
 Computational context:
@@ -64,7 +64,7 @@ Computational context:
 \end{tabular}
 
 \caption{%
-  Interactive session of the proof for the 
+  Interactive session of the proof for the
   \lstinline!halts_step! lemma.
 }
 \label{fig:halt-harpoon}
