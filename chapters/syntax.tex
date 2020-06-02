@@ -4,10 +4,11 @@
 \chaptermark{Logical Foundation}
 \label{chap:theory}
 
-In this section we give a logical foundation for interactive
-command-driven theorem proving in \Beluga{}. In particular, we describe interactive
-commands and their relationship to proof scripts which in turn can be
-compiled to \Beluga{} programs.
+In this chapter we give a logical foundation for interactive
+command-driven theorem proving in \Beluga{} using Harpoon.
+In particular, we describe Harpoon's interactive commands, their relationship
+to proof scripts, and the translation from proof scripts into \Beluga{} programs.
+
 % A key insight in this theoretical development is to use contextual variables to
 % represent open subgoals in a proof.
 
@@ -27,14 +28,17 @@ compiled to \Beluga{} programs.
   Background:  proofs as programs%
 }
 \label{sec:beluga}
-We begin by describing \Beluga's programming language where we can
+
+We have already described programming in Beluga in Sec.~\ref{sec:beluga-intro},
+but that discussion remained at a very high level to give intuition about the
+system.
+Here we describe formally \Beluga's programming language where we can
 describe (inductive) proofs as total recursive programs.
 From a logical perspective, a \Beluga{} program witnesses a theorem in a
 first-order logic equipped with induction over a specific index domain.
-In general, this index domain can be natural numbers, strings, or lists
-\cite{ChH03Pha,Xi:POPL03}, although in \Beluga{}, this index domain
-consists of first-class contexts and (contextual) LF objects (see
-\cite{Cave:POPL12}).
+Recall that in general, there are many possible index domains to choose from.
+Beluga chooses contextual LF together with first-class contexts as its index
+language.
 Keeping this in mind, we keep the index domain abstract in the
 description of \Beluga{} below. We abstractly refer to terms and types
 in the index language by \emph{index term} $C$ and \emph{index type}
@@ -56,13 +60,13 @@ index term $C$ to which $X$ is bound at runtime. The index context
 $\Delta$ captures the information that is statically available and is
 used during type checking.
 
-In the previous example from Sec. \ref{sec:example}, the index domain
-included the definitions for \lstinline!tp!, \lstinline!tm A!,
-\lstinline!step M M!, and \lstinline!steps M M!. Recall that to make
-statements about those index domain objects, we paired the objects
-(and type) together with the context in which they were meaningful. In
-our grammar above, $U$ refers to such a contextual type and $C$
-denotes a contextual object, for example
+In the examples from Chap.~\ref{chap:example}, the index domain included the
+definitions for \lstinline!tp!, \lstinline!tm A!, \lstinline!step M M!, and
+\lstinline!steps M M!.
+Recall that to make statements about those index domain objects, we pair those
+objects (and their types) together with the context in which they are meaningful.
+In the grammar above, $U$ refers to such a contextual type and $C$ denotes a
+contextual object, for example
 \lstinline!( |- arr unit unit)! is the contextual type of
 \lstinline!( |- lam \x. x)!.
 Contextual objects may contain index
@@ -70,12 +74,14 @@ variables that are declared in $\Delta$. For example,
 \lstinline!( |- steps M M)! is meaningful in the index context
 $\Delta = $ \lstinline!A:( |- tp), M:( |- tm A)!.
 
-We do not describe here in full the index language, since it has been
-described elsewhere and is not crucial for the understanding or our
-design of \Harpoon;
-the interested reader is referred to \cite{Thibodeau:ICFP16,JacobRao:stratified2018}. %
+We do not describe here the index language in full detail -- it is quite
+technical, it has been described elsewhere, and such a level of detail is not
+crucial for the understanding or our design of \Harpoon.
+Instead, we refer the interested reader to
+\cite{Thibodeau:ICFP16,JacobRao:stratified2018}.
+\todo{These citations don't describe LF in full detail either...}
 Instead we list several relevant properties of the index language to be
-compatible with our current presentation. %
+compatible with our current presentation.
 
 \begin{description}
 \item \emph{Type checking index terms.} $\Delta \proves C \chk U$
@@ -193,6 +199,10 @@ that eliminates a subgoal variable, satisfying the following theorem.
   then $\belchkjudg{\Omega,\Omega^\prime\mid\goalctx{}}{\psubst{e^\prime/\bar g}}{\tau}$.
 \end{thm}
 
+\begin{proof}
+  By induction on the first typing derivation.
+\end{proof}
+
 This property together with a corresponding one for proof subgoal variables is
 central to the soundness of interactive proof development in
 Sec.~\ref{sec:harpoon-actions}.
@@ -284,7 +294,16 @@ These forms of substitution admit a soundness property.
   when we arrive at an embedded expression $e$.
   2. By induction on the typing for $P$.
 \end{proof}
-%
+
+\begin{figure}[tp]
+  \input{figs/proofs-types.tex}%
+  \input{figs/directives-types.tex}%
+  \caption{%
+    The type system for \Harpoon{} proofs and directives%
+  }%
+  \label{fig:harpoon-types}%
+\end{figure}
+
 We extend a proof script using \kwby{} or \kwunbox{} to introduce new
 assumptions.
 The \kwby{} construct is used both for invoking a lemma, introducing
@@ -307,15 +326,6 @@ we can generate all valid induction hypotheses in advance and store them in the
 context $\Gamma$ (see \cite{Pientka:TLCA15}).
 Finally, when we encounter an appeal to an induction hypothesis, it suffices to
 check whether it is compatible with any of the precomputed ones in $\Gamma$.
-
-\begin{figure}[tp]
-  \input{figs/proofs-types.tex}%
-  \input{figs/directives-types.tex}%
-  \caption{%
-    The type system for \Harpoon{} proofs and directives%
-  }%
-  \label{fig:harpoon-types}%
-\end{figure}
 
 There are four different directives we can use in a proof. The
 simplest directive, $\kwsolves e$, merely ends a proof script by
@@ -419,7 +429,7 @@ actions in Fig.~\ref{fig:interactive}. This relationship is by
 design both immediate and straightforward.
 
 %%%%% INTERACTIVE HARPOON TYPING
-\begin{figure}[htp]
+\begin{figure}
   \input{figs/interactive-harpoon-types}%
   \caption{%
     Typing of interactive actions and elaboration into proof scripts.
@@ -465,11 +475,9 @@ user interacts with the proof assistant.
 \]
 %
 
-The design of our interactive proof engine guarantees that a proof
-script $P$ that results from a session $\actionseq$ is well-typed,
-i.e.~$\prfchkjudg{\Omega \mid \goalctx{}}{P}{\tau}$. %
-In other words, individual actions produce well-typed partial
-proofs and the proof refinement in the \isingle{} rule preserves types.
+The proof script $P$ that results from a session $\actionseq$ is well-typed.
+To see this, we first establish that the partial proof script generated by a
+single action indeed solves the subgoal in which it is executed.
 
 \begin{figure}[ht]
   \input{figs/interactive-harpoon-sequence}%
@@ -497,64 +505,41 @@ proofs and the proof refinement in the \isingle{} rule preserves types.
 %   \itranssjudg{\Omega}{P}{\actionseq}{\cdot}{P^\prime}
 % \]
 
-\begin{thm}[Session Soundness]
+\begin{thm}[Action Soundness]
   \label{thm:interactive-command-correctness}
-  \begin{enumerate}
-  \item   If $\itrnsjudg{\Delta; \Gamma}{\tau}{\action}{\Omega}{P}$,
+  \item If $\itrnsjudg{\Delta; \Gamma}{\tau}{\action}{\Omega}{P}$,
   then $\prfchkjudg{\Omega \mid \Delta ; \Gamma}{P}{\tau}$.
-  \item \label{thm:interactive-tps}
+\end{thm}
+\begin{proof}
+  By case analysis on the given derivation.
+\end{proof}
+
+Then, given that individual actions produce well-typed proof fragments, it
+suffices to use the fact that subgoal substitution preserves types to establish
+that a whole session $\actionseq$ generates a well-typed proof script.
+
+\begin{thm}[Session Soundness]
+  \label{thm:interactive-tps}
+\item
   If $\prfchkjudg{\Omega \!\mid\!\goalctx{}}{\!P}{\tau}$
   and $\itranssjudg{\Omega}{\!P}{\actionseq}{\Omega^\prime}{\!P^\prime}$,
   then $\prfchkjudg{\Omega^\prime\! \mid\! \goalctx{}}{\!P^\prime}{\tau}$.
-  \end{enumerate}
-
 \end{thm}
 \begin{proof}
-1. By a simple case analysis on the given derivation. 2. By
-straightforward induction using (1) and the subgoal substitution property.
+  By induction using the previous theorem and the subgoal substitution property.
 \end{proof}
-%\begin{proof} By case analysis on the given derivation. \end{proof}
 
-% \begin{lemma}[Subgoal Substitution]% ~\\
-% %  \vspace{-\topsep}
-%   \label{thm:interactive-subst-lemma}
-%   \begin{enumerate}
-%   \item If $\prfchkjudg{(\Omega, g{:} \goal{^\prime}) \mid \Delta ; \Gamma}{P}{\tau}$
-%     and $\prfchkjudg{\Omega \mid \goalctx{^\prime}}{P^\prime}{\tau^\prime}$ \\
-%     then $\prfchkjudg{\Omega \mid
-%       \goalctx{}}{\psubst{P'/g}{P}}{\tau}$.
-% \\[-0.75em]
-%   \item If $\dirchkjudg{(\Omega, g{:} \goal{^\prime}) \mid \goalctx{}}{D}{\tau}$
-%     and $\prfchkjudg{\Omega \mid \goalctx{^\prime}}{P^\prime}{\tau^\prime}$ \\
-%     then $\dirchkjudg{\Omega \mid \goalctx{}}{\psubst{P'/g}{D}}{\tau}$.
-%   \end{enumerate}
-% \end{lemma}
+What one would like to establish next is a completeness result: any
+\emph{provable} statement $\tau$ admits a session $\actionseq$ whose elaboration
+generates a proof script $P$ such that $\prfchkjudg{\cdot\mid\goalctx{}}{P}{\tau}$.
+As a proxy for provability and in light of the translation presented in the
+following section, one can consider statements $\tau$ having a Beluga term $e$
+that check against that type.
+Sadly, we cannot establish completeness for now, since Beluga supports deep
+pattern matching (in which a pattern consists of nested constructors), whereas
+the \kwsplits directive can only capture 1-deep patterns.
+\inlinetodo{Prove a restricted completeness theorem, in which patterns are nice?}
 
-%\begin{proof}
-%  By mutual induction on the typing derivation of $P$ and $D$.
-%\end{proof}
-
-
-%\begin{proof}
-%  By induction on the session judgment, using
-%  theorems \ref{thm:interactive-command-correctness} and
-%  \ref{thm:interactive-subst-lemma} at each step.
-%\end{proof}
-
-% Finally, if we again consider a complete session $\actionseq$, such that
-% $\itranssjudg{g : \goalclosed}{g}{\actionseq}{\cdot}{P}$, then by the previous
-% theorem, we have that $\prfchkjudg{\cdot \mid \cdot ; \cdot}{P}{\tau}$ in the empty subgoal
-% context.  By the theorem presented in the following section, this then entails
-% that the session $\actionseq$ constructs a \Beluga{} term of the same type
-% $\tau$, and hence that $\actionseq$ represents a proper proof.
-
-
-% \inlinetodo{This justifies how a proof script generates a complete
-%   program; can it also be used to justify generating a part of a
-%   program that is then spliced into an existing Beluga program with a
-%   hole? -- It's not hard to see that one can always spawn holes as
-%   auxiliary statements that are proven and then used as a lemma inside
-%   the orignal proof. -bp}
 \section{Translation}
 \label{sec:translation}
 
@@ -569,17 +554,39 @@ property ensure that this preserves types.
 The \kwsplit{} directive translates to
 a case-expression in \Beluga{}, making use of the patterns produced by \scov.
 Finally the \kwsuffices{} directive translates into a function application.
-It follows from a straightforward induction that the translation is total and
-type-preserving.
+The following soundness property follows immediately.
 
 % TRANSLATION RULES
-\begin{figure}[hp]
+\begin{figure}[htp]
   \input{figs/translation}%
   \caption{%
     The translation from a \Harpoon{} proof script to a \Beluga{} program.%
   }%
   \label{fig:translation}
 \end{figure}%
+
+\begin{thm}[Translation Soundness]
+  \mutualtheorems
+  \begin{enumerate}
+  \item
+    For any proof script $P$, if $\prfchkjudg{\Omega \mid \goalctx{}}{P}{\tau}$,
+    then there exists a unique expression $e$ such that
+    $ \prftransjudg{\Omega \mid \goalctx{}}{P}{e}{\tau} $.
+
+  \item
+    For any directive $D$, if $\dirchkjudg{\Omega\mid\goalctx{}}{D}{\tau}$,
+    then there exists a unique expression $e$ such that
+    $ \dirtransjudg{\Omega\mid\goalctx{}}{D}{e}{\tau} $.
+  \end{enumerate}
+
+  Moreover, in both cases $e$ is such that
+  $\belchkjudg{\Omega\mid\goalctx{}}{e}{\tau}$.
+\end{thm}
+
+\begin{proof}
+  By induction on the translation derivation.
+\end{proof}
+
 %
 %%% Local Variables:
 %%% TeX-master: "../main.tex"

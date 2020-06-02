@@ -1,4 +1,6 @@
 \chapter{Proof Development in \Harpoon}
+\sloppy % This ensures that code fragments don't overflow the line by allowing
+        % more generous space between words
 \label{chap:example}
 
 We introduce the main features of \Harpoon{} by considering two
@@ -19,9 +21,8 @@ encoding.
 In typical HOAS style, lambda abstraction takes an LF function representing the
 abstraction of a term over a variable. There is no case for variables, as they
 are treated implicitly.
-We remind the reader that this is a weak, representational function space~--~%
-there is no case analysis or recursion, so only genuine lambda terms can
-be represented.
+Given that LF does not have case analysis or recursion, its function space is a
+weak, representational one: only genuine lambda terms can be represented.
 %
 \begin{center}
 \begin{tabular}{ll}
@@ -179,30 +180,31 @@ Finally, we can finish the proof by supplying the term
 
 \section{Setup continued: reducibility}
 \label{sec:setup-2}
-We now proceed to define normalization using using reducibility
-candidates~\cite{proofs-and-types}.
-In essence, we define a set of terms \emph{reducible} at a type \lstinline!T!. %
+
+We define normalization using reducibility candidates~\cite{proofs-and-types}.
+That is, for each type \lstinline!T! we define a set of terms \emph{reducible}
+at that type.
 All reducible terms are required to halt, and terms reducible at an arrow type
 are required to produce reducible output given reducible input.
-Concretely,  a term
+Formally,  a term
 \lstinline!M! is reducible at type \lstinline!(arr T1 T2)!,
  if for all
-terms \lstinline!N:tm T1! where \lstinline!N! is reducible at type
+terms \lstinline!N:tm T1!, if \lstinline!N! is reducible at type
 \lstinline!T1!, then \lstinline!(app M N)! is reducible at type \lstinline!T2!.
 %This is
 %sometimes phrased as ``if good things go in, then good things come out.'' %
 Reducibility cannot be directly encoded at the LF layer, as it is not
 merely describing the syntax tree of an expression or derivation.
-Instead, we encode the set of reducible terms using the stratified
-type \lstinline!Reduce! which is recursively defined on the type
-\lstinline!T! in \Beluga{} (see \cite{JacobRao:stratified2018}). Note
-that we write \lstinline!{ }! for explicit universal quantification.
+Instead, we encode the set of reducible terms \lstinline!Reduce! as a
+\emph{stratified type} (see \cite{JacobRao:stratified2018}).
+This can be seen as a restricted form of type-level function, defined
+inductively on the type \lstinline!T! used as an index.
 
 \begin{lstlisting}
 stratified Reduce : {T : [⊢ tp]} [⊢ tm T] → type =
   | Unit: [⊢halts M] → Reduce [⊢unit] [⊢M]
-  | Arr : [⊢halts M] →
-           ({N:[⊢tm T1]} Reduce [⊢T1] [⊢N] → Reduce [⊢T2] [⊢app M N])
+  | Arr : [⊢halts M]
+        → ({N:[⊢tm T1]} Reduce [⊢T1] [⊢N] → Reduce [⊢T2] [⊢app M N])
         → Reduce [⊢arr T1 T2] [⊢M];
 \end{lstlisting}
 
