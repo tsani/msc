@@ -1,4 +1,44 @@
-\chapter{Related work \& conclusion}
+\chapter{Conclusion}
+
+\section{Evaluation}
+
+One should be able to use \Harpoon{} to prove anything that one could prove in
+\Beluga. A proper completeness theorem is for now too complex\footnotemark, so
+instead we have replicated a number of case studies originally proven as
+functional programs in \Beluga. (See table~\ref{table:evaluation}.)
+\footnotetext{%
+  \Beluga's support for deep pattern matching complicates a potential
+  completeness proof.
+}
+
+\begin{table}[h]
+  \centering
+  \input{figs/evaluation-table.tex}
+  \caption{%
+    Summary of proofs ported to \Harpoon{} from \Beluga.
+  }
+  \label{table:evaluation}
+\end{table}
+
+The first four examples are purely syntactic arguments that proceed by
+straightforward induction.
+The remaining examples involve more sophisticated features from \Beluga's
+computation language such as inductive and stratified types used to encode
+logical relations.
+
+Recreating these case studies in \Harpoon{} was straightforward and provided us
+with insight as to future work regarding automation. In the syntactic case
+studies, proofs tend to proceed by case analysis on the induction variable,
+inverting any other assumptions when possible, invoking available induction
+hypotheses, and applying a few inference rules. This general recipe could be
+automated in whole or in part to simplify the development of similar simple
+proofs.
+
+\section{Related work}
+
+Although we devoted Chap.~\ref{chap:background} to discussing the prior work
+related to Harpoon, we wish to now make a critical comparison between Harpoon
+and some of that work.
 
 The Hazelnut system is similar to \Harpoon{} in that its metatheory formally
 describes partial programs and the user interactions that construct such a
@@ -31,33 +71,13 @@ contexts is lower-level: one must explicitly model them, e.g. using lists.
 As for Coq, its Ltac language \cite{Delahaye:LPAR00} is quite
 unrestricted in its power, so Coq's typechecker must verify separately any term
 built by an Ltac program.
+
 % Consequently, it is difficult to obtain any assurance that a tactic one has
 % developed is sound.
 % Although user-definable tactics are a very powerful and attractive feature for a
 % proof assistant, we prefer that \Harpoon{} use a fixed set of verified tactics
 % until we have designed a suitable tactic development language that offers
 % correctness guarantees about tactics defined in it.
-
-In conclusion, we have presented \Harpoon, an interactive command-driven
-front-end of \Beluga{} for mechanizing metatheoretic proofs.
-Users develop proofs using interactive actions that elaborate a proof script
-behind the scenes.
-This elaboration's metatheory which we have presented shows that all
-intermediate partial proofs are well-typed with respect to a context of
-outstanding subgoals to resolve.
-We have also developed the metatheory of proof scripts, giving a sound
-translation to \Beluga{} programs.
-This development relies crucially on reasoning about partial programs, which we
-represent as containing contextual variables, called subgoal variables, that
-capture the current typechecking state.
-We have evaluated \Harpoon{} on a number of case-studies, ranging from purely
-syntactic arguments to logical relations.
-
-In the future, we aim to improve the automation capabilities of \Harpoon.
-At first, we wish to add a built-in form of proof search to assist in using the
-\ttsolves command, perhaps replacing it entirely. In the long term, we hope to
-apply insights gained from work on Cocon \cite{cocon} to enable users to define
-custom tactics together with correctness guarantees about them.
 
 % In contrast to having users directly write dependently-typed programs
 % as in Agda or Twelf, proof assistants systems such as \Coq{}
@@ -119,6 +139,29 @@ custom tactics together with correctness guarantees about them.
 % interactive command generate invalid syntax or an ill-typed code fragment. The
 % interactive \Emacs{} mode for \Beluga{}, similar to \Agda's, suffered from this
 % same shortcoming.
+
+\section{Final remarks}
+
+In conclusion, we have presented \Harpoon, an interactive command-driven
+front-end of \Beluga{} for mechanizing metatheoretic proofs.
+Users develop proofs using interactive actions that elaborate a proof script
+behind the scenes.
+This elaboration's metatheory which we have presented shows that all
+intermediate partial proofs are well-typed with respect to a context of
+outstanding subgoals to resolve.
+We have also developed the metatheory of proof scripts, giving a sound
+translation to \Beluga{} programs.
+This development relies crucially on reasoning about partial programs, which we
+represent as containing contextual variables, called subgoal variables, that
+capture the current typechecking state.
+We have evaluated \Harpoon{} on a number of case-studies, ranging from purely
+syntactic arguments to logical relations.
+
+In the future, we aim to improve the automation capabilities of \Harpoon.
+At first, we wish to add a built-in form of proof search to assist in using the
+\ttsolves command, perhaps replacing it entirely. In the long term, we hope to
+apply insights gained from work on Cocon \cite{cocon} to enable users to define
+custom tactics together with correctness guarantees about them.
 
 %%% Local Variables:
 %%% TeX-master: "../main.tex"
