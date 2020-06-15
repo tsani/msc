@@ -3,13 +3,10 @@
 \section{Evaluation}
 
 One should be able to use \Harpoon{} to prove anything that one could prove in
-\Beluga. A proper completeness theorem is for now too complex\footnotemark, so
-instead we have replicated a number of case studies originally proven as
-functional programs in \Beluga. (See table~\ref{table:evaluation}.)
-\footnotetext{%
-  \Beluga's support for deep pattern matching complicates a potential
-  completeness proof.
-}
+\Beluga. As mentioned in Sec.~\ref{sec:harpoon-actions}, we do not prove a
+completeness theorem, so instead we have replicated a number of case studies
+originally proven as functional programs in \Beluga.
+(See table~\ref{table:evaluation}.)
 
 \begin{table}[h]
   \centering
@@ -26,13 +23,18 @@ The remaining examples involve more sophisticated features from \Beluga's
 computation language such as inductive and stratified types used to encode
 logical relations.
 
-Recreating these case studies in \Harpoon{} was straightforward and provided us
-with insight as to future work regarding automation. In the syntactic case
-studies, proofs tend to proceed by case analysis on the induction variable,
-inverting any other assumptions when possible, invoking available induction
-hypotheses, and applying a few inference rules. This general recipe could be
-automated in whole or in part to simplify the development of similar simple
-proofs.
+Recreating these case studies in \Harpoon{} was straightforward, since most
+constructs from Beluga have clear analogues in \Harpoon.
+One challenge was to decide when to use the \ttsufficess tactic, since most
+reasoning in Beluga is purely forwards.
+
+Porting these case studies provides us with insight as to future work regarding
+automation.
+In the syntactic case studies, proofs tend to proceed by case analysis on the
+induction variable, inverting any other assumptions when possible, invoking
+available induction hypotheses, and applying a few inference rules.
+This general recipe could be automated in whole or in part to simplify the
+development of similar simple proofs.
 
 \section{Related work}
 
@@ -47,6 +49,19 @@ Whereas Hazelnut concentrates on programming, \Harpoon{} is an interface to
 \Beluga, a proof assistant. Hazelnut's edit actions construct a simply-typed
 program by successively filling holes, and types in Hazelnut may also contain
 holes that are refined by edit actions.
+In Hazelnut, there is a notion of cursor that is absent in Harpoon.
+The focus of the Harpoon user is always on an (unsolved) subgoal, whereas in
+Hazelnut, one can use certain actions to move to arbitrary locations in the
+constructed expression.
+Harpoon distinguishes clearly between expressions containing holes and
+expressions free of holes, thanks to the subgoal context $\Omega$ that is part
+of the typing judgments.
+This context is also used to drive the selection of the next hole to work on
+when considering an interactive session $\actionseq$.
+The typing judgment for Hazelnut, in contrast, does not show the presence of
+subgoals in the expression. A context analoguous to $\Omega$ is not necessary
+as a means of finding the next subgoal to work on since the system is equipped
+with general movement actions.
 
 Abella is similar to the \Beluga{} project more broadly in that it is a
 domain-specific language using HOAS for mechanizing metatheory
@@ -60,17 +75,40 @@ well-formedness. Interactive proof development in Abella follows the traditional
 model: the proof state is manipulated using tactics drawn from a fixed set. No
 proof object that witnesses the theorem is produced.
 
-The tactic languages of VeriML \cite{Stampoulis:ICFP10,Stampoulis:POPL12} and
-Coq stand in contrast to \Harpoon's, as theirs may be extended.
-In VeriML, one uses an ML-like computation language to define tactics that
-manipulate objects from its underlying logic language.
-This computation language is very expressive, including such features as
-nontermination and mutable references.
-However, its management of metatheoretic concerns such as substitutions and
-contexts is lower-level: one must explicitly model them, e.g. using lists.
-As for Coq, its Ltac language \cite{Delahaye:LPAR00} is quite
-unrestricted in its power, so Coq's typechecker must verify separately any term
-built by an Ltac program.
+The VeriML system is grounded in Contextual Modal Type Theory, as is Beluga.
+However, it differs in its goal, as it seeks to provide a very expressive
+language for defining new tactics.
+In our work, we restrict ourselves to a finite set of tactics with clearly
+defined semantics, whereas in VeriML one can use effects such as state and
+nontermination in order to build complex decision procedures in addition to more
+basic tactics.
+Both VeriML and Beluga follow a two-layer approach: whereas Beluga's object
+language is contextual LF, VeriML's is \lhol.
+The management of metatheoretic concerns such as substitutions and contexts is
+low-level: one much explicitly model them, e.g. using lists.
+
+Although much of the discussion in Chap.~\ref{chap:background} focused on tactic
+languages for Coq, all of these differ from Harpoon in their aims.
+Harpoon seeks simply to provide a form of user interaction together with a
+well-specified semantics for those interactions based on an explicit notion of
+partial program.
+Ltac, on the other hand, is meant as a language for defining \emph{new} tactics,
+and these tactics may implement decision procedures or restricted proof search
+techniques.
+Given Beluga's focus on mechanized metatheory, it is not clear yet that one
+needs the ability to define decision procedures or use proof search techniques.
+This is in fact the reason why we avoid using the word ``tactic'' to refer to
+the interactive actions available in Harpoon: the notion of tactic is much
+broader that what we aim for in Harpoon.
+The MetaCoq system, in contrast with Ltac, is more foundational.
+It seeks to provide a formalization of the Coq system within Coq itself.
+Moreover, it appears more akin to a metaprogramming system than an interactivity
+layer: one can write MetaCoq programs that are able to look up definitions and
+inspect them, and whose effects generate new toplevel declarations.
+Harpoon is humbler, in that it does not try to formalize Beluga within itself,
+nor does it provide any way to generate new definitions.
+Instead Harpoon restricts its actions to those that generate proof fragments
+(terms).
 
 % Consequently, it is difficult to obtain any assurance that a tactic one has
 % developed is sound.
