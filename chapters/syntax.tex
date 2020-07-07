@@ -79,7 +79,6 @@ technical, it has been described elsewhere, and such a level of detail is not
 crucial for the understanding or our design of \Harpoon.
 Instead, we refer the interested reader to
 \cite{Thibodeau:ICFP16,JacobRao:stratified2018}.
-\todo{These citations don't describe LF in full detail either...}
 Instead we list several relevant properties of the index language to be
 compatible with our current presentation.
 
@@ -100,7 +99,7 @@ compatible with our current presentation.
 \end{description}
 
 
-Below we describe the core fragment of \Beluga{}.
+Below we describe the core fragment of \Beluga{} as a bidirectional type system.
 Terms are separated into those that we check against a given type and those for
 which we synthesize a type.
 To keep the presentation simple, we model (co)inductive and stratified types as
@@ -187,7 +186,7 @@ We distinguish between subgoal variables $\bar g$ that stand for programs from
 those $g$ that stand for \emph{proofs} described in Sec.~\ref{sec:harpoon}.
 We call these \emph{program} subgoal variables and \emph{proof} subgoal
 variables, respectively.
-Observe that the latter form of subgoal variable cannot appear within programs,
+Observe that a proof subgoal variable cannot appear within a program,
 so the subgoal context $\Omega$ in Fig.~\ref{fig:beluga-types} only ever
 contains program subgoal variables, of the form $\bar g$.
 As expected, one can define a notion of substitution $\psubst{e^\prime/\bar g}e$
@@ -234,7 +233,7 @@ new subgoal can be understood as transforming the initial subgoal.
   \end{grammar}
 \]
 %
-We only consider here a small subset of the tactics we support in
+We only consider here a subset of the tactics we support in
 \Harpoon{}; others and new ones can be added following the same principles:
 \ttintross introduces all available assumptions;
 \ttsolve{} provides an explicit term to close the current subgoal;
@@ -356,7 +355,7 @@ whose output respects an expected soundness property.
     If $
     \unrolljudg{
       \goalwith{\goalctx{^\prime}}{\beta}
-    }{\goalctx{}}{\tau}{e}
+    }{\goalctx{}}{e}{\tau}
     $, then $
     \belchkjudg{
       g : \goalwith{\goalctx{^\prime}}{\beta} \mid \goalctx{}
@@ -424,9 +423,11 @@ target type $\tau_0^\prime$.
 \section{Interactive Proof Development}
 \label{sec:harpoon-actions}
 
-We now describe the generation of a proof script based on the
+We now describe the construction of a proof script based on the
 actions in Fig.~\ref{fig:interactive}. This relationship is by
-design both immediate and straightforward.
+design both immediate and straightforward: each action generates a well-typed
+proof fragment, and these fragments are assembled together by subgoal
+substitutions to form the overall proof script.
 
 %%%%% INTERACTIVE HARPOON TYPING
 \begin{figure}
@@ -538,7 +539,6 @@ that check against that type.
 Sadly, we cannot establish completeness for now, since Beluga supports deep
 pattern matching (in which a pattern consists of nested constructors), whereas
 the \kwsplits directive can only capture 1-deep patterns.
-\inlinetodo{Prove a restricted completeness theorem, in which patterns are nice?}
 
 \section{Translation}
 \label{sec:translation}

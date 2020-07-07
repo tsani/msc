@@ -83,7 +83,8 @@ defined semantics, whereas in VeriML one can use effects such as state and
 nontermination in order to build complex decision procedures in addition to more
 basic tactics.
 Both VeriML and Beluga follow a two-layer approach: whereas Beluga's object
-language is contextual LF, VeriML's is \lhol.
+language is contextual LF, VeriML's is \lhol, which the authors see as a common
+core between Coq and HOL provers such as Isabelle and HOL-light.
 The management of metatheoretic concerns such as substitutions and contexts is
 low-level: one much explicitly model them, e.g. using lists.
 
@@ -192,7 +193,7 @@ translation to \Beluga{} programs.
 This development relies crucially on reasoning about partial programs, which we
 represent as containing contextual variables, called subgoal variables, that
 capture the current typechecking state.
-We have evaluated \Harpoon{} on a number of case-studies, ranging from purely
+We have evaluated \Harpoon{} on a number of case studies, ranging from purely
 syntactic arguments to logical relations.
 
 In the future, we aim to improve the automation capabilities of \Harpoon.
