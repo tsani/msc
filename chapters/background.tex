@@ -202,10 +202,54 @@ these two views appear in later systems, too.
 %   nondeterminism in the proof search?
 % }
 
+\subsection{Tactics in NuPRL}
+
+While Europe is certainly abuzz with research into proof assistants, so is
+Cornell University in New York. There, Robert Constable and his collaborators
+develop the NuPRL system~\cite{nuprl}. The tactics and surface-level
+architecture of NuPRL resemble Isabelle-88's: the system is implemented in ML,
+and tactics are created by writing them in ML.\@ Again as in Isabelle, the
+tactics are safe in the sense that invalid proofs cannot be produced by a
+tactic, so they similarly do not suffer from that shortcoming of the original LCF tactics.
+
+The distinguishing feature of NuPRL is that it is an \emph{extensional} type
+system, unlike Isabelle-88 discussed above and Coq discussed below.
+That is, NuPRL admits a typing rule called equality reflection, by which
+propositional equality is included within definitional equality.
+The upshot is that definitional equality is undecidable, so there is no proper
+typechecking algorithm for NuPRL.\@
+Instead, the user presents a type to the system and interactively constructs a
+derivation of that type using tactics.
+
+One of NuPRL's uses is formalized mathematics, in which the proof term
+that witnesses the theorem is often irrelevant.
+In that case, the user instructs the system to begin a proof for the statement
+$A$ that is the encoded form of the theorem they wish to prove.
+The use of the tactics generates behind the scenes the proof term $a$ and the
+explicit typing derivation witnessing that $a$ has type $A$.
+
+In contrast, another of NuPRL's uses is to verify algorithms. This proceeds in
+two steps.
+First, one implements the algorithm $a$ in a familiar ML-like programming
+language.
+Second, one instructs the system to begin a proof of $a \in A$, where $A$ is a
+type that encodes the correctness guarantees to be established about $a$.
+(For example, one might want to show that a list sorting algorithm's output is
+an ordered permutation of its input; the type $A$ would encode this property.)
+
+In sum, although undecidability of typechecking appears to be a blow to the
+system's ergonomics, it does also provide a benefit: the algorithms one designs
+must be cleanly separated from the proofs about those algorithms.
+Moreover, in the common case of establishing theorems whose proof terms one
+doesn't care about, one can simply concentrate on the formulas being manipulated
+without regard for the proof term.
+Let the tactics take care of the tedious work of constructing the proof term and
+its typing derivation!
+
 \section{Languages for defining tactics}
 \label{sec:defining-tactics}
 
-\isb{} and LCF do not have proper languages for defining tactics.
+NuPRL, \isb, and LCF do not have proper languages for defining tactics.
 Instead, one defines tactics essentially by extending the proof assistant
 itself.
 This works reasonably well in those settings because the assistant is
