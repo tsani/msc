@@ -1,6 +1,7 @@
-\begin{center}
-  \bfseries\textsc{Abstract}
-\end{center}
+\begin{abstract}
+% \begin{center}
+%   \bfseries\textsc{Abstract}
+% \end{center}
 
 Beluga is a proof environment based on the logical framework LF that provides
 infrastructural support for representing formal systems and proofs about them.
@@ -18,16 +19,53 @@ us to execute them. Proof scripts and programs seamlessly interact and can be
 used interchangeably.
 
 We have used Harpoon for examples ranging from simple type safety proofs for
-MiniML to normalization proofs including the recently proposed POPLMark reloaded
+MiniML to normalization proofs including the recently proposed POPLMark Reloaded
 challenge.
 Our implementation is a part of Beluga on GitHub at
 \url{https://github.com/Beluga-lang/Beluga} and the reference manual is
 available at \url{https://beluga-lang.readthedocs.io/}.
+\end{abstract}
+
+\newpage
+
+{
+  \selectlanguage{french}
+  \begin{abstract}
+  \frenchspacing
+
+Beluga est un assistant de preuves bas\'e sur le cadre logique (logical
+framework) LF et donnant une infrastructure quant \`a la repr\'esentation de
+syst\`emes formels et de preuves concernant ceux-ci.
+Par cons\'equence, ces preuves metath\'eoriques sont pr\'ecises et compactes.
+Cependant, on d\'eveloppe une preuve avec Beluga en tant que programme
+r\'ecursif total, ce qui est difficile et encombrant.
+
+Nous pr\'esentons alors la conception de Harpoon, une extension \`a Beluga, avec
+lequel on fait le d\'eveloppement interactif de preuves.
+L'utilisateur de Harpoon construit une preuve en utilisant un petit ensemble
+ferm\'e \emph{d'actions}.
+L'ex\'ecution de celles-ci \'elabore un \emph{texte de preuve} (proof script)
+qui refl\`ete la structure des sous-objectifs qui se pr\'esentent
+dans la preuve.
+Nous mod\'elisons les preuves incompl\`etes en utilisant des variables
+contextuelles pour repr\'esenter les sous-objectifs qui restent \`a r\'esoudre.
+Nous \'etablissons de plus une mani\`ere de traduire les textes de preuve en
+programmes Beluga traditionels, ce qui permet l'ex\'ecution de ces preuves.
+Les textes de preuve et les programmes Beluga int\'eragissent facilement, donc
+l'utilisateur peut choisir quel m\'ethode de preuve lui convient le mieux.
+
+Nous avons \'evalu\'e Harpoon sur de nombreux exemples, en passant par des
+th\'eor\`emes de pr\'eservation de typage et de progr\`es pour MiniML
+ainsi que des th\'eor\`emes de normalisation tels que le r\'ecent d\'efi
+POPLMark Reloaded.
+
+Le code que nous avons \'ecrit fait maintenant partie de Beluga sur GitHub \`a
+\url{https://github.com/Beluga-lang/Beluga} et le manuel de r\'ef\'erence est
+disposible \`a \url{https://beluga-lang.readthedocs.io/}.
+\end{abstract}
+}
 
 \vfill
-
-
-%We have used Harpoon in examples ranging from type safety for MiniML to normalization proofs for the simply-typed lambda calculus.
 
 %%% Local Variables:
 %%% mode: latex

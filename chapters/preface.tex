@@ -1,0 +1,85 @@
+\chapter*{Preface}
+\addcontentsline{toc}{chapter}{Preface}
+
+\section*{Ackowledgements}
+
+Although a thesis is something one writes primarily alone, it documents work
+that would be impossible without the large support structure that comes with a
+research group in a university. In my case, I am truly grateful to Complogic
+group at McGill, and I am thankful that so many of its members have helped me
+through the years of work poured into my research.
+
+I want to especially acknowledge David Thibodeau, desk neighbour and colleague
+extraordinaire. His insight in resolving both practical implementation concerns
+with Harpoon as well as more theoretical issues was invaluable.
+I very much appreciated his persistent readiness to hear out my crazy ideas and
+to offer his own crazy ideas in return.
+I look back fondly on the summer reading group we put together for Homotopy Type
+Theory and the many times we got sidetracked messing around with Agda.
+I will consider myself very lucky should I ever have an officemate so equally
+both fun and intellectually stimulating as him.
+
+Next I want to thank Clare Jang and Marcel Goh for their help in more directly
+developing Harpoon. Clare took charge of several tricky implementation tasks
+such as Harpoon's ability to overwrite existing holes in proof scripts with new
+proof fragments. Marcel helped to develop the theory for translation from proof
+scripts to Beluga programs as part of an undergraduate research course, and he
+wrote the preliminary code for typechecking and translation proof scripts.
+
+Of course, I want to recognize next the tremendous support of my advisor,
+Brigitte Pientka. I vividly recall still to this day a time when I told a friend
+in first year that I would be so happy to do a summer research project with
+Brigitte. Little did I know then that I would find her so engaging and
+stimulating that I would do an entire master's degree under her supervision.
+Beluga is a quite the large project, so it is entirely due to her guidance that
+I was able to understand it so deeply and to make improvements to it.
+Her careful attention to detail and her principled approach to programming
+language theory taught me a lot about how one should conduct research.
+I admire her involvement in the research community, and I aspire to myself be so
+involved in the communities I should find myself in.
+
+Finally, I want to thank my partner Eric. I especially want to thank him for
+being so understanding of the time commitments that graduate school involves. I
+reminisce often about our walks, talking about logic, proofs, and theory. Few
+people outside this specific research community have much interest in what I do,
+so it was crucial for me to have an outsider to bounce ideas of off and to keep
+me sane and grounded.
+
+\section*{Contribution of authors}
+
+The main technical exposition in Chap.~\ref{chap:theory} is primarily my own
+original work. Prof.~Pientka gave me a lot of guidance early on for ideas on how
+to define the structured proof script language and she helped me to develop its
+type system. She also guided me in the implementation as I brushed up against
+several complex features of Beluga.
+
+I developed the formalization of the interactive actions themselves, in
+Sec.~\ref{sec:harpoon-actions} which led me to extend the syntax of proof
+scripts with subgoal variables. I then developed the notion of subgoal context.
+I noticed that these subgoal variables were unusual in that they are checkable
+expressions, and that the upshot of this is that the subgoal context is
+understood as an output of the typing judgment.
+The statements of all the theorems and their proofs were worked out by me.
+
+Marcel Goh helped to develop the translation presented in
+Sec.~\ref{sec:translation} and wrote some preliminary code for typechecking and
+translating proof scripts. I was the primary implementor of the code, with some
+help from Clare Jang who implemented the system of automatic tactics and the
+code for overwriting proof scripts with their more refined forms.
+Clare also was responsible for porting a few of the examples listed in
+Sec.~\ref{sec:evaluation} and Marcel wrote a few of the smaller tests for
+Harpoon.
+
+The running example discussed in Chap.~\ref{chap:example} was designed by
+Prof.~Pientka and me, and I owe the overall structure of that chapter to her.
+I also owe it to her for how to properly motivate this work in
+Chap.~\ref{chap:introduction}.
+
+The literature review given in Chap.~\ref{chap:background}
+and the comparative analysis of other systems in Sec.~\ref{sec:related-work} is
+entirely my own work.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main.tex"
+%%% End:

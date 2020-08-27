@@ -1,4 +1,4 @@
-\documentclass[letter, 12pt, oneside]{book}
+\documentclass[letter, 12pt, oneside]{report}
 
 % Load all custom commands and advanced configuration.
 \input{prelude.tex}
@@ -9,11 +9,21 @@
 \newcommand{\authorrunning}{J.~Errington et al.}
 \newcommand{\titlerunning}{\title}
 
+\usepackage[french, english]{babel}
+
+% \usepackage{etoolbox}
+% \patchcmd{\abstract}{\titlepage}{\titlepage% Insert ToC-writing after starting a titlepage
+%   \addcontentsline{toc}{chapter}{Abstract}}{}{}
+
 \begin{document}
 
 \input{chapters/title-page}
 %
 \input{chapters/abstract}
+%
+\tableofcontents \newpage
+%
+\input{chapters/preface}
 %
 \input{chapters/intro}
 %
